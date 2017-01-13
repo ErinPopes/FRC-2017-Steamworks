@@ -16,8 +16,6 @@ public class Robot extends IterativeRobot {
 	final String defaultAuto = "Default";
 	final String customAuto = "My Auto";
 	String autoSelected;
-	
-	// Hello.
 	SendableChooser<String> chooser = new SendableChooser<>();
 
 	/**
