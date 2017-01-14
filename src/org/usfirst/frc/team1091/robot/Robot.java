@@ -2,6 +2,9 @@ package org.usfirst.frc.team1091.robot;
 
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -17,7 +20,8 @@ public class Robot extends IterativeRobot {
 	final String customAuto = "My Auto";
 	String autoSelected;
 	SendableChooser<String> chooser = new SendableChooser<>();
-
+	RobotDrive myRobot = new RobotDrive(0, 1);
+	Joystick leftStick = new Joystick(0);
 	/**
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
@@ -28,7 +32,8 @@ public class Robot extends IterativeRobot {
 		chooser.addObject("My Auto", customAuto);
 		SmartDashboard.putData("Auto choices", chooser);
 		CameraServer.getInstance().startAutomaticCapture();
-
+		
+		myRobot.setExpiration(0.1);
 	}
 
 	/**
@@ -71,8 +76,13 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
+		myRobot.setSafetyEnabled(true);
+		while (isOperatorControl() && isEnabled()) {
+			myRobot.arcadeDrive(leftStick, true);
+			Timer.delay(0.005); // wait for a motor update time
+		}
 	}
-
+	
 	/**
 	 * This function is called periodically during test mode
 	 */
