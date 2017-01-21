@@ -1,93 +1,81 @@
 package org.usfirst.frc.team1091.robot;
 
-import edu.wpi.first.wpilibj.CameraServer;
-import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.SampleRobot;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.CameraServer;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Solenoid;
 
-/**
- * The VM is configured to automatically run this class, and to call the
- * functions corresponding to each mode, as described in the IterativeRobot
- * documentation. If you change the name of this class or the package after
- * creating this project, you must also update the manifest file in the resource
- * directory.
- */
-public class Robot extends IterativeRobot {
-	final String defaultAuto = "Default";
-	final String customAuto = "My Auto";
-	String autoSelected;
-	SendableChooser<String> chooser = new SendableChooser<>();
-	RobotDrive myRobot = new RobotDrive(0, 1);
-	Joystick leftStick = new Joystick(0);
-	/**
-	 * This function is run when the robot is first started up and should be
-	 * used for any initialization code.
-	 */
-	@Override
-	public void robotInit() {
-		chooser.addDefault("Default Auto", defaultAuto);
-		chooser.addObject("My Auto", customAuto);
-		SmartDashboard.putData("Auto choices", chooser);
-		CameraServer.getInstance().startAutomaticCapture();
-		
+public class Robot extends SampleRobot {
+
+	private CameraServer server;
+
+	// ReEnable soon
+	// SerialPort.Port port = new Port(3);
+	// SerialPort sonic = new SerialPort(19200, port);
+	// SerialPort serialPort;
+
+	private RobotDrive myRobot;
+	private final Joystick xbox; // xbox controller
+	final double deadZone = 0.02;
+	final DriverStation.Alliance color;
+	
+	public Robot() {
+
+		color = DriverStation.getInstance().getAlliance();
+		System.out.print(color.name());
+		myRobot = new RobotDrive(0, 1, 2, 3);
 		myRobot.setExpiration(0.1);
+		xbox = new Joystick(0);
 	}
 
-	/**
-	 * This autonomous (along with the chooser code above) shows how to select
-	 * between different autonomous modes using the dashboard. The sendable
-	 * chooser code works with the Java SmartDashboard. If you prefer the
-	 * LabVIEW Dashboard, remove all of the chooser code and uncomment the
-	 * getString line to get the auto name from the text box below the Gyro
-	 *
-	 * You can add additional auto modes by adding additional comparisons to the
-	 * switch structure below with additional strings. If using the
-	 * SendableChooser make sure to add them to the chooser code above as well.
-	 */
-	@Override
-	public void autonomousInit() {
-		autoSelected = chooser.getSelected();
-		// autoSelected = SmartDashboard.getString("Auto Selector",
-		// defaultAuto);
-		System.out.println("Auto selected: " + autoSelected);
+	// MAIN AUTONOMOUS METHOD
+
+	public void autonomous() {
+		System.out.println("Auto F.A.P for success (For arreal persoison)");
 	}
 
-	/**
-	 * This function is called periodically during autonomous
-	 */
-	@Override
-	public void autonomousPeriodic() {
-		switch (autoSelected) {
-		case customAuto:
-			// Put custom auto code here
-			break;
-		case defaultAuto:
-		default:
-			// Put default auto code here
-			break;
-		}
+	long lLastEncoderVal = 0;
+	long rLastEncoderVal = 0;
+	long lastTime = System.currentTimeMillis();
+
+	// UPDATE CONTROLS AND SENSORS
+	private void refresh() throws InterruptedException {
+		long currentTime = System.currentTimeMillis();
+		xboxDrive(); // For xbox controls
+		// xboxAutoShoot(angle, RPM);
+
 	}
 
-	/**
-	 * This function is called periodically during operator control
-	 */
-	@Override
-	public void teleopPeriodic() {
+	// MAIN WHILE LOOP
+	public void operatorControl() {//
 		myRobot.setSafetyEnabled(true);
 		while (isOperatorControl() && isEnabled()) {
-			myRobot.arcadeDrive(leftStick, true);
-			Timer.delay(0.005); // wait for a motor update time
+			try {
+				refresh();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} // Update controls and sensors
+			Timer.delay(0.001); // wait for a motor update time
+
 		}
 	}
-	
-	/**
-	 * This function is called periodically during test mode
-	 */
+
+	// XBOX DRIVING CONTROLS
+	private void xboxDrive() {
+		double yAxis = xbox.getRawAxis(1) * .60;
+		double xAxis = xbox.getRawAxis(0) * -.60;
+		if (!(Math.abs(yAxis) < deadZone) || !(Math.abs(xAxis) < deadZone))
+			myRobot.arcadeDrive(yAxis, xAxis, true);
+	}
+
 	@Override
-	public void testPeriodic() {
+	public void disabled() {
+		System.out.println("time to just wait.. and wait");
 	}
 }
-
