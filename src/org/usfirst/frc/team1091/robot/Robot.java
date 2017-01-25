@@ -7,18 +7,9 @@ import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.Victor;
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Solenoid;
 
 public class Robot extends SampleRobot {
 
-	private CameraServer server;
-
-	// ReEnable soon
-	// SerialPort.Port port = new Port(3);
-	// SerialPort sonic = new SerialPort(19200, port);
-	// SerialPort serialPort;
 
 	private RobotDrive myRobot;
 	private final Joystick xbox; // xbox controller
@@ -46,7 +37,6 @@ public class Robot extends SampleRobot {
 
 	// UPDATE CONTROLS AND SENSORS
 	private void refresh() throws InterruptedException {
-		long currentTime = System.currentTimeMillis();
 		xboxDrive(); // For xbox controls
 		// xboxAutoShoot(angle, RPM);
 
