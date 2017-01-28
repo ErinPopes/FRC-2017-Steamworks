@@ -3,19 +3,27 @@ package org.usfirst.frc.team1091.robot;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.CameraServer;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Relay;
+import edu.wpi.first.wpilibj.Relay.Direction;
+import edu.wpi.first.wpilibj.Relay.Value;
 import edu.wpi.first.wpilibj.Timer;
 
 public class Robot extends SampleRobot {
-
 
 	private RobotDrive myRobot;
 	private final Joystick xbox; // xbox controller
 	final double deadZone = 0.02;
 	final DriverStation.Alliance color;
-	
+	DigitalInput bottomLimitSwitch;
+	DigitalInput topLimitSwitch;
+	DigitalInput lifterSwitch;
+	Relay lifterSpike;
+
 	public Robot() {
 
 		color = DriverStation.getInstance().getAlliance();
@@ -23,6 +31,10 @@ public class Robot extends SampleRobot {
 		myRobot = new RobotDrive(0, 1, 2, 3);
 		myRobot.setExpiration(0.1);
 		xbox = new Joystick(0);
+		bottomLimitSwitch = new DigitalInput(0);
+		topLimitSwitch = new DigitalInput(1);
+		lifterSwitch = new DigitalInput(2);
+		lifterSpike = new Relay(0);
 	}
 
 	// MAIN AUTONOMOUS METHOD
@@ -38,6 +50,8 @@ public class Robot extends SampleRobot {
 	// UPDATE CONTROLS AND SENSORS
 	private void refresh() throws InterruptedException {
 		xboxDrive(); // For xbox controls
+		gearDoor();
+		lifter();
 		// xboxAutoShoot(angle, RPM);
 
 	}
@@ -54,6 +68,45 @@ public class Robot extends SampleRobot {
 			Timer.delay(0.001); // wait for a motor update time
 
 		}
+	}
+	
+	private void lifter(){
+		boolean liftStartButton = xbox.getRawButton(4);
+		
+		if (lifterSwitch.get()==false && liftStartButton) {
+			lifterSpike.setDirection(Direction.kReverse);
+			lifterSpike.set(Value.kOn);
+		}
+		else{
+			lifterSpike.set(Value.kOff);
+		}
+		
+	}
+
+	// Button controls
+	private void gearDoor() {
+		boolean doorOpenButton = xbox.getRawButton(6);
+		boolean doorCloseButton = xbox.getRawButton(5);
+		// Victor door = new Victor(4);
+
+		if (doorOpenButton && topLimitSwitch.get()) {
+			while (topLimitSwitch.get()) { // run door motor forwards to open
+											// door
+				// door.set(0.5);
+			}
+			// door.set(0);
+		}
+
+		if (doorCloseButton && bottomLimitSwitch.get()) {
+			while (bottomLimitSwitch.get()) { // run door motor backwards to
+												// close door
+				// door.set(-0.5);
+			}
+			// door.set(0);
+		}
+
+		// if doorButton = true &&
+
 	}
 
 	// XBOX DRIVING CONTROLS
