@@ -4,6 +4,8 @@ import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -13,19 +15,25 @@ import edu.wpi.first.wpilibj.Relay.Direction;
 import edu.wpi.first.wpilibj.Relay.Value;
 import edu.wpi.first.wpilibj.Timer;
 
+import static org.usfirst.frc.team1091.robot.StartingPosition.*;
+
 public class Robot extends SampleRobot {
 
 	private RobotDrive myRobot;
-	private final Joystick xbox; // xbox controller
+	private Joystick xbox; // xbox controller
 	final double deadZone = 0.02;
-	final DriverStation.Alliance color;
+	DriverStation.Alliance color;
 	DigitalInput bottomLimitSwitch;
 	DigitalInput topLimitSwitch;
 	DigitalInput lifterSwitch;
 	Relay lifterSpike;
 	Victor door;
 
-	public Robot() {
+	SendableChooser<StartingPosition> chooser = new SendableChooser<>();
+	StartingPosition autoSelected;
+
+	@Override
+	public void robotInit() {
 
 		color = DriverStation.getInstance().getAlliance();
 		System.out.print(color.name());
@@ -34,16 +42,69 @@ public class Robot extends SampleRobot {
 		xbox = new Joystick(0);
 		bottomLimitSwitch = new DigitalInput(0);
 		topLimitSwitch = new DigitalInput(1);
-		Victor door = new Victor(4);
+		door = new Victor(4);
 		lifterSwitch = new DigitalInput(2);
 		lifterSpike = new Relay(0);
+
+		chooser.addDefault(CENTER.name(), CENTER);
+		chooser.addObject(LEFT.name(), LEFT);
+		chooser.addObject(RIGHT.name(), RIGHT);
+		SmartDashboard.putData("Auto choices", chooser);
+
 	}
 
 	// MAIN AUTONOMOUS METHOD
 
 	public void autonomous() {
 		System.out.println("Auto F.A.P for success (For arreal persoison)");
+
+		autoSelected = chooser.getSelected();
+
+		switch (autoSelected) {
+
+		case LEFT:
+			autonomousLeft();
+			break;
+
+		case RIGHT:
+			autonomousRight();
+			break;
+
+		case CENTER:
+			autonomousCenter();
+			break;
+
+		}
+
 	}
+
+	private void autonomousLeft() {
+
+		// Tell what you do in autonomous left here
+		System.out.println("Do Left Function");
+
+	}
+
+	private void autonomousCenter() {
+
+		// Tell what you do in autonomous middle here
+		System.out.println("Do Middle Function");
+
+	}
+
+	private void autonomousRight() {
+
+		// Tell what you do in autonomous right here
+		System.out.println("Do Right Function");
+
+	}
+
+	// public class Robot extends IterativeRobot {
+	// final String defaultAuto = "Default";
+	// final String customAuto = "My Auto";
+	// final String defaultAuto = "Default";
+
+	// String autoSelected;
 
 	long lLastEncoderVal = 0;
 	long rLastEncoderVal = 0;
