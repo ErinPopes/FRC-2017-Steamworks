@@ -23,6 +23,7 @@ public class Robot extends SampleRobot {
 	DigitalInput topLimitSwitch;
 	DigitalInput lifterSwitch;
 	Relay lifterSpike;
+	Victor door;
 
 	public Robot() {
 
@@ -33,6 +34,7 @@ public class Robot extends SampleRobot {
 		xbox = new Joystick(0);
 		bottomLimitSwitch = new DigitalInput(0);
 		topLimitSwitch = new DigitalInput(1);
+		Victor door = new Victor(4);
 		lifterSwitch = new DigitalInput(2);
 		lifterSpike = new Relay(0);
 	}
@@ -69,40 +71,39 @@ public class Robot extends SampleRobot {
 
 		}
 	}
-	
-	private void lifter(){
+
+	// Lifter code
+	private void lifter() {
 		boolean liftStartButton = xbox.getRawButton(4);
-		
-		if (lifterSwitch.get()==false && liftStartButton) {
+
+		if (lifterSwitch.get() == false && liftStartButton) {
 			lifterSpike.setDirection(Direction.kReverse);
 			lifterSpike.set(Value.kOn);
-		}
-		else{
+		} else {
 			lifterSpike.set(Value.kOff);
 		}
-		
+
 	}
 
 	// Button controls
 	private void gearDoor() {
 		boolean doorOpenButton = xbox.getRawButton(6);
 		boolean doorCloseButton = xbox.getRawButton(5);
-		// Victor door = new Victor(4);
 
 		if (doorOpenButton && topLimitSwitch.get()) {
 			while (topLimitSwitch.get()) { // run door motor forwards to open
 											// door
-				// door.set(0.5);
+				door.set(0.5);
 			}
-			// door.set(0);
+			door.set(0);
 		}
 
 		if (doorCloseButton && bottomLimitSwitch.get()) {
 			while (bottomLimitSwitch.get()) { // run door motor backwards to
 												// close door
-				// door.set(-0.5);
+				door.set(-0.5);
 			}
-			// door.set(0);
+			door.set(0);
 		}
 
 		// if doorButton = true &&
