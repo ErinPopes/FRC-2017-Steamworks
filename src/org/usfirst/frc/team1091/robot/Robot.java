@@ -1,15 +1,18 @@
 package org.usfirst.frc.team1091.robot;
 
 import edu.wpi.first.wpilibj.SampleRobot;
+import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.Relay.Direction;
 import edu.wpi.first.wpilibj.Relay.Value;
@@ -22,12 +25,15 @@ public class Robot extends SampleRobot {
 	private RobotDrive myRobot;
 	private Joystick xbox; // xbox controller
 	final double deadZone = 0.02;
+	private CameraServer camera;
 	DriverStation.Alliance color;
 	DigitalInput bottomLimitSwitch;
 	DigitalInput topLimitSwitch;
 	DigitalInput lifterSwitch;
 	Relay lifterSpike;
 	Victor door;
+	Spark climer;
+	private Encoder lEncod, rEncod; // 20 per rotation
 
 	SendableChooser<StartingPosition> chooser = new SendableChooser<>();
 	StartingPosition autoSelected;
@@ -45,6 +51,11 @@ public class Robot extends SampleRobot {
 		door = new Victor(4);
 		lifterSwitch = new DigitalInput(2);
 		lifterSpike = new Relay(0);
+		lEncod = new Encoder(3, 4, true);
+		rEncod = new Encoder(5, 6);
+		climer = new Spark(5);
+		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
+		camera.setResolution(640, 480);
 
 		chooser.addDefault(CENTER.name(), CENTER);
 		chooser.addObject(LEFT.name(), LEFT);
@@ -56,7 +67,6 @@ public class Robot extends SampleRobot {
 	// MAIN AUTONOMOUS METHOD
 
 	public void autonomous() {
-		System.out.println("Auto F.A.P for success (For arreal persoison)");
 
 		autoSelected = chooser.getSelected();
 
@@ -112,11 +122,11 @@ public class Robot extends SampleRobot {
 
 	// UPDATE CONTROLS AND SENSORS
 	private void refresh() throws InterruptedException {
+		lLastEncoderVal = lEncod.get();
+		rLastEncoderVal = rEncod.get();
 		xboxDrive(); // For xbox controls
 		gearDoor();
 		lifter();
-		// xboxAutoShoot(angle, RPM);
-
 	}
 
 	// MAIN WHILE LOOP
@@ -136,12 +146,17 @@ public class Robot extends SampleRobot {
 	// Lifter code
 	private void lifter() {
 		boolean liftStartButton = xbox.getRawButton(4);
+		boolean liftDownButton = xbox.getRawButton(3);
+		// switch to use pwm instead of the spike, because the spike is a lying
+		// piece of sh!t who made your wife cheat on you
 
 		if (lifterSwitch.get() == false && liftStartButton) {
-			lifterSpike.setDirection(Direction.kReverse);
-			lifterSpike.set(Value.kOn);
-		} else {
-			lifterSpike.set(Value.kOff);
+			climer.set(-.9);
+		} else if (liftDownButton){
+			climer.set(.3);
+		}
+		else{
+			climer.set(0);
 		}
 
 	}
@@ -152,18 +167,10 @@ public class Robot extends SampleRobot {
 		boolean doorCloseButton = xbox.getRawButton(5);
 
 		if (doorOpenButton && topLimitSwitch.get()) {
-			while (topLimitSwitch.get()) { // run door motor forwards to open
-											// door
-				door.set(0.5);
-			}
-			door.set(0);
-		}
-
-		if (doorCloseButton && bottomLimitSwitch.get()) {
-			while (bottomLimitSwitch.get()) { // run door motor backwards to
-												// close door
-				door.set(-0.5);
-			}
+			door.set(0.5);
+		} else if (doorCloseButton && bottomLimitSwitch.get()) {
+			door.set(-0.5);
+		} else {
 			door.set(0);
 		}
 
@@ -173,8 +180,8 @@ public class Robot extends SampleRobot {
 
 	// XBOX DRIVING CONTROLS
 	private void xboxDrive() {
-		double yAxis = xbox.getRawAxis(1) * .60;
-		double xAxis = xbox.getRawAxis(0) * -.60;
+		double yAxis = xbox.getRawAxis(1) * -.8;
+		double xAxis = xbox.getRawAxis(0) * -.8;
 		if (!(Math.abs(yAxis) < deadZone) || !(Math.abs(xAxis) < deadZone))
 			myRobot.arcadeDrive(yAxis, xAxis, true);
 	}
