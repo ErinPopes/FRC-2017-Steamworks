@@ -12,12 +12,8 @@ import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.Relay;
-import edu.wpi.first.wpilibj.Relay.Direction;
-import edu.wpi.first.wpilibj.Relay.Value;
 import edu.wpi.first.wpilibj.Timer;
-
 import static org.usfirst.frc.team1091.robot.StartingPosition.*;
 
 public class Robot extends SampleRobot {
@@ -32,31 +28,50 @@ public class Robot extends SampleRobot {
 	DigitalInput lifterSwitch;
 	Relay lifterSpike;
 	Victor door;
-	Spark climer;
+	Spark climber;
+	// Date date;
 	private Encoder lEncod, rEncod; // 20 per rotation
+	private double speed;
 
-	SendableChooser<StartingPosition> chooser = new SendableChooser<>();
+	SendableChooser<StartingPosition> chooser;
 	StartingPosition autoSelected;
+
+	long lCurrentEncoderVal;
+	long rCurrentEncoderVal;
+	// long lastTime = date.getTime();
+	long lLastEncoderVal;// lEncod.get();
+	long rLastEncoderVal;// rEncod.get();
 
 	@Override
 	public void robotInit() {
+		rCurrentEncoderVal = 0;
+		lCurrentEncoderVal = 0;
+		lLastEncoderVal = 0;
+		rLastEncoderVal = 0;
+		speed = 0;
 
 		color = DriverStation.getInstance().getAlliance();
 		System.out.print(color.name());
+
 		myRobot = new RobotDrive(0, 1, 2, 3);
 		myRobot.setExpiration(0.1);
 		xbox = new Joystick(0);
+
 		bottomLimitSwitch = new DigitalInput(0);
 		topLimitSwitch = new DigitalInput(1);
-		door = new Victor(4);
+		door = new Victor(6);
 		lifterSwitch = new DigitalInput(2);
 		lifterSpike = new Relay(0);
+
 		lEncod = new Encoder(3, 4, true);
 		rEncod = new Encoder(5, 6);
-		climer = new Spark(5);
+		climber = new Spark(5);
+		// date = new Date();
 		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 		camera.setResolution(640, 480);
+		// wheels 4 inches
 
+		chooser = new SendableChooser<>();
 		chooser.addDefault(CENTER.name(), CENTER);
 		chooser.addObject(LEFT.name(), LEFT);
 		chooser.addObject(RIGHT.name(), RIGHT);
@@ -109,26 +124,27 @@ public class Robot extends SampleRobot {
 
 	}
 
-	// public class Robot extends IterativeRobot {
-	// final String defaultAuto = "Default";
-	// final String customAuto = "My Auto";
-	// final String defaultAuto = "Default";
-
-	// String autoSelected;
-
-	long lLastEncoderVal = 0;
-	long rLastEncoderVal = 0;
-	long lastTime = System.currentTimeMillis();
-
 	// UPDATE CONTROLS AND SENSORS
 	private void refresh() throws InterruptedException {
-		lLastEncoderVal = lEncod.get();
-		rLastEncoderVal = rEncod.get();
+		lCurrentEncoderVal = lEncod.get();
+		rCurrentEncoderVal = rEncod.get();
 		xboxDrive(); // For xbox controls
 		gearDoor();
 		lifter();
+		// System.out.println(speed);
 	}
 
+	// private void updateSpeed() {
+	// if (date.getTime() - lastTime >= 250) {
+	// double distance = (Math.PI/90)*((lCurrentEncoderVal - lLastEncoderVal)
+	// + (rCurrentEncoderVal - rLastEncoderVal))/2;
+	// speed = distance/(0.25); //inches per second
+	// lastTime = date.getTime();
+	// lLastEncoderVal = lCurrentEncoderVal;
+	// rLastEncoderVal = rCurrentEncoderVal;
+	//
+	// }
+	// }
 	// MAIN WHILE LOOP
 	public void operatorControl() {//
 		myRobot.setSafetyEnabled(true);
@@ -151,12 +167,11 @@ public class Robot extends SampleRobot {
 		// piece of sh!t who made your wife cheat on you
 
 		if (lifterSwitch.get() == false && liftStartButton) {
-			climer.set(-.9);
-		} else if (liftDownButton){
-			climer.set(.3);
-		}
-		else{
-			climer.set(0);
+			climber.set(-.9);
+		} else if (liftDownButton) {
+			climber.set(.3);
+		} else {
+			climber.set(0);
 		}
 
 	}
@@ -167,9 +182,9 @@ public class Robot extends SampleRobot {
 		boolean doorCloseButton = xbox.getRawButton(5);
 
 		if (doorOpenButton && topLimitSwitch.get()) {
-			door.set(0.5);
+			door.set(1);
 		} else if (doorCloseButton && bottomLimitSwitch.get()) {
-			door.set(-0.5);
+			door.set(-1);
 		} else {
 			door.set(0);
 		}
