@@ -1,9 +1,9 @@
 package org.usfirst.frc.team1091.robot;
 
-import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -16,7 +16,9 @@ import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.Timer;
 import static org.usfirst.frc.team1091.robot.StartingPosition.*;
 
-public class Robot extends SampleRobot {
+import static spark.Spark.*;
+
+public class Robot extends IterativeRobot {
 
 	private RobotDrive myRobot;
 	private Joystick xbox; // xbox controller
@@ -41,6 +43,8 @@ public class Robot extends SampleRobot {
 	// long lastTime = date.getTime();
 	long lLastEncoderVal;// lEncod.get();
 	long rLastEncoderVal;// rEncod.get();
+
+	float visionCenter;
 
 	@Override
 	public void robotInit() {
@@ -76,6 +80,14 @@ public class Robot extends SampleRobot {
 		chooser.addObject(LEFT.name(), LEFT);
 		chooser.addObject(RIGHT.name(), RIGHT);
 		SmartDashboard.putData("Auto choices", chooser);
+
+		// Little web server to get data from camera
+		visionCenter = 0;
+		port(5805);
+		get("/steer/:turn", (req, res) -> {
+			visionCenter = Float.parseFloat(req.params("turn"));
+			return visionCenter;
+		});
 
 	}
 
@@ -201,8 +213,4 @@ public class Robot extends SampleRobot {
 			myRobot.arcadeDrive(yAxis, xAxis, true);
 	}
 
-	@Override
-	public void disabled() {
-		System.out.println("time to just wait.. and wait");
-	}
 }
