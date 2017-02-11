@@ -35,6 +35,7 @@ public class Robot extends IterativeRobot {
 	Spark door;
 	Spark climber;
 	Encoder encoder;
+	StepExecutor stepExecutor;
 	
 	private Encoder lEncod, rEncod; // 20 per rotation on the encoder, 360 per rotation on the wheel
 	
@@ -119,27 +120,37 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void autonomousInit() {
 		autoSelected = chooser.getSelected();
-		lEncod.reset();
-		rEncod.reset();
+		switch (autoSelected) {
+
+		case LEFT:
+			Step[] steps = new Step[] {
+					new DriveForwards(myRobot, lEncod, rEncod, 5)	
+				};
+				this.stepExecutor = new StepExecutor(steps);
+			break;
+
+		case RIGHT:
+			Step[] steps = new Step[] {
+					new DriveForwards(myRobot, lEncod, rEncod, 5)	
+				};
+				this.stepExecutor = new StepExecutor(steps);
+			break;
+
+		case CENTER:
+			Step[] steps = new Step[] {
+					new DriveForwards(myRobot, lEncod, rEncod, 5)	
+				};
+				this.stepExecutor = new StepExecutor(steps);
+			break;
+		}
+		
+
     }
 	
 	// MAIN AUTONOMOUS METHOD
 	@Override
 	public void autonomousPeriodic() {
-		switch (autoSelected) {
-
-		case LEFT:
-			autonomousLeft();
-			break;
-
-		case RIGHT:
-			autonomousRight();
-			break;
-
-		case CENTER:
-			autonomousCenter();
-			break;
-		}
+	
 	}
 
 	private void autonomousLeft() {
