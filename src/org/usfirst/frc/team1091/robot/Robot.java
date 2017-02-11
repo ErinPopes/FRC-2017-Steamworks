@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotDrive;
@@ -17,14 +16,12 @@ import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.Timer;
 import static org.usfirst.frc.team1091.robot.StartingPosition.*;
 
-import static spark.Spark.*;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.net.URL;
 
-public class Robot extends SampleRobot {
+public class Robot extends IterativeRobot {
 
 	private RobotDrive myRobot;
 	private Joystick xbox; // xbox controller
@@ -54,6 +51,7 @@ public class Robot extends SampleRobot {
 	long rLastEncoderVal;// rEncod.get();
 
 	float visionCenter;
+	final double ticksPerInch = 360.0 / (4.0 * Math.PI);
 
 	@Override
 	public void robotInit() {
@@ -112,12 +110,17 @@ public class Robot extends SampleRobot {
 		};
 		//new Thread(visionUpdater).start();
 	}
-
-	// MAIN AUTONOMOUS METHOD
-
-	public void autonomous() {
-
+    @Override
+	public void autonomousInit() {
 		autoSelected = chooser.getSelected();
+		lEncod.reset();
+		rEncod.reset();
+		
+    }
+	
+	// MAIN AUTONOMOUS METHOD
+	@Override
+	public void autonomousPeriodic() {
 
 		switch (autoSelected) {
 
@@ -144,17 +147,29 @@ public class Robot extends SampleRobot {
 	private void autonomousCenter() {
 
 		// Tell what you do in autonomous middle here
-
+		//Drive forward until certain distance from center and then put the gear on and back up. 
+		if (lCurrentEncoderVal > 5 * 12 * ticksPerInch) {
+			myRobot.arcadeDrive(1, 0, true);
+		}
+		else {
+			myRobot.arcadeDrive(0, 0, true);
+		}
 	}
 
 	private void autonomousRight() {
 
 	}
 
+	@Override
+	public void teleopInit() {
+		
+	}
+	
 	// UPDATE CONTROLS AND SENSORS
-	private void refresh() throws InterruptedException {
-		lCurrentEncoderVal = lEncod.get();
-		rCurrentEncoderVal = rEncod.get();
+	@Override
+	public void teleopPeriodic() {
+//		lCurrentEncoderVal = lEncod.get();
+//		rCurrentEncoderVal = rEncod.get();
 		xboxDrive(); // For xbox controls
 		gearDoor();
 		lifter();
@@ -175,19 +190,7 @@ public class Robot extends SampleRobot {
 	//
 	// }
 	// }
-	// MAIN WHILE LOOP
-	public void operatorControl() {//
-		myRobot.setSafetyEnabled(true);
-		while (isOperatorControl() && isEnabled()) {
-			try {
-				refresh();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			} // Update controls and sensors
-			Timer.delay(0.001); // wait for a motor update time
 
-		}
-	}
 
 	// Lifter code
 	private void lifter() {
