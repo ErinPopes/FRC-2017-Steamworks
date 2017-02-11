@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -18,19 +19,27 @@ import static org.usfirst.frc.team1091.robot.StartingPosition.*;
 
 import static spark.Spark.*;
 
-public class Robot extends IterativeRobot {
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.ConnectException;
+import java.net.URL;
+
+public class Robot extends SampleRobot {
 
 	private RobotDrive myRobot;
 	private Joystick xbox; // xbox controller
 	final double deadZone = 0.02;
 	private CameraServer camera;
 	DriverStation.Alliance color;
-	DigitalInput bottomLimitSwitch;
-	DigitalInput topLimitSwitch;
+	DigitalInput openLimitSwitch; // Limit Switch is pushed in when door is
+									// open. False when door is open.
+	DigitalInput closedLimitSwitch; // Limit Switch is pushed in when door is
+									// closed. False when door is closed.
 	DigitalInput lifterSwitch;
 	Relay lifterSpike;
-	Victor door;
+	Spark door;
 	Spark climber;
+	Encoder encoder;
 	// Date date;
 	private Encoder lEncod, rEncod; // 20 per rotation
 	private double speed;
@@ -61,14 +70,15 @@ public class Robot extends IterativeRobot {
 		myRobot.setExpiration(0.1);
 		xbox = new Joystick(0);
 
-		bottomLimitSwitch = new DigitalInput(0);
-		topLimitSwitch = new DigitalInput(1);
-		door = new Victor(6);
+		openLimitSwitch = new DigitalInput(0);
+		closedLimitSwitch = new DigitalInput(1);
+		door = new Spark(4);
 		lifterSwitch = new DigitalInput(2);
 		lifterSpike = new Relay(0);
 
 		lEncod = new Encoder(3, 4, true);
 		rEncod = new Encoder(5, 6);
+
 		climber = new Spark(5);
 		// date = new Date();
 		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
@@ -81,14 +91,26 @@ public class Robot extends IterativeRobot {
 		chooser.addObject(RIGHT.name(), RIGHT);
 		SmartDashboard.putData("Auto choices", chooser);
 
-		// Little web server to get data from camera
 		visionCenter = 0;
-		port(5805);
-		get("/steer/:turn", (req, res) -> {
-			visionCenter = Float.parseFloat(req.params("turn"));
-			return visionCenter;
-		});
+		Runnable visionUpdater = () -> {
+			while (true) {
+				try {
+					URL visionURL = new URL("http://172.21.6.159:5805/");
 
+					BufferedReader in = new BufferedReader(new InputStreamReader(visionURL.openStream()));
+
+					String inputLine = in.readLine();
+					visionCenter = Float.parseFloat(inputLine);
+					in.close();
+					Thread.sleep(100);
+				} catch (ConnectException e) {
+					System.out.println("No connection");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		};
+		//new Thread(visionUpdater).start();
 	}
 
 	// MAIN AUTONOMOUS METHOD
@@ -117,22 +139,15 @@ public class Robot extends IterativeRobot {
 
 	private void autonomousLeft() {
 
-		// Tell what you do in autonomous left here
-		System.out.println("Do Left Function");
-
 	}
 
 	private void autonomousCenter() {
 
 		// Tell what you do in autonomous middle here
-		System.out.println("Do Middle Function");
 
 	}
 
 	private void autonomousRight() {
-
-		// Tell what you do in autonomous right here
-		System.out.println("Do Right Function");
 
 	}
 
@@ -143,7 +158,10 @@ public class Robot extends IterativeRobot {
 		xboxDrive(); // For xbox controls
 		gearDoor();
 		lifter();
-		// System.out.println(speed);
+		// DriverStation.getInstance(lCurrentEncoderVal);
+		// DriverStationLCD.println("left" + lCurrentEncoderVal);
+		//System.out.print("left" + lCurrentEncoderVal);
+		//System.out.print("right" + rCurrentEncoderVal);
 	}
 
 	// private void updateSpeed() {
@@ -175,10 +193,11 @@ public class Robot extends IterativeRobot {
 	private void lifter() {
 		boolean liftStartButton = xbox.getRawButton(4);
 		boolean liftDownButton = xbox.getRawButton(3);
+
 		// switch to use pwm instead of the spike, because the spike is a lying
 		// piece of sh!t who made your wife cheat on you
 
-		if (lifterSwitch.get() == false && liftStartButton) {
+		if (liftStartButton) {
 			climber.set(-.9);
 		} else if (liftDownButton) {
 			climber.set(.3);
@@ -193,10 +212,10 @@ public class Robot extends IterativeRobot {
 		boolean doorOpenButton = xbox.getRawButton(6);
 		boolean doorCloseButton = xbox.getRawButton(5);
 
-		if (doorOpenButton && topLimitSwitch.get()) {
-			door.set(1);
-		} else if (doorCloseButton && bottomLimitSwitch.get()) {
-			door.set(-1);
+		if (doorOpenButton && openLimitSwitch.get() == false){ //&& closedLimitSwitch.get() == true) {
+			door.set(.4);
+		} else if (doorCloseButton && closedLimitSwitch.get() == false){ //&& openLimitSwitch.get() == true) {
+			door.set(-.4);
 		} else {
 			door.set(0);
 		}
@@ -207,10 +226,17 @@ public class Robot extends IterativeRobot {
 
 	// XBOX DRIVING CONTROLS
 	private void xboxDrive() {
-		double yAxis = xbox.getRawAxis(1) * -.8;
+
+		autoForward(1);
+
+		double yAxis = xbox.getRawAxis(1) * .8;
 		double xAxis = xbox.getRawAxis(0) * -.8;
 		if (!(Math.abs(yAxis) < deadZone) || !(Math.abs(xAxis) < deadZone))
 			myRobot.arcadeDrive(yAxis, xAxis, true);
+	}
+
+	private void autoForward(int distance) {
+
 	}
 
 }
