@@ -45,6 +45,10 @@ public class Robot extends IterativeRobot {
 	float visionCenter;
 	final double ticksPerInch = 360.0 / (4.0 * Math.PI);
 
+	/*************************
+	 * ROBOT code that is called once for all modes
+	 */
+	
 	@Override
 	public void robotInit() {	
 		color = DriverStation.getInstance().getAlliance();
@@ -65,8 +69,8 @@ public class Robot extends IterativeRobot {
 
 		climber = new Spark(5);
 		
-		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
-		camera.setResolution(640, 480);
+//		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
+//		camera.setResolution(640, 480);
 		// wheels 4 inches
 
 		chooser = new SendableChooser<>();
@@ -75,6 +79,7 @@ public class Robot extends IterativeRobot {
 		chooser.addObject(RIGHT.name(), RIGHT);
 		SmartDashboard.putData("Auto choices", chooser);
 
+		System.out.println("We are actually running");
 		visionCenter = 0;
 		Runnable visionUpdater = () -> {
 			while (true) {
@@ -96,18 +101,31 @@ public class Robot extends IterativeRobot {
 		};
 		//new Thread(visionUpdater).start();
 	}
-    @Override
+	
+	@Override
+	public void robotPeriodic(){
+		
+	}
+	
+	@Override
+	public void disabledPeriodic(){
+		
+	}
+	
+	
+/****************
+*	Autonomous
+*****************/
+	@Override
 	public void autonomousInit() {
 		autoSelected = chooser.getSelected();
 		lEncod.reset();
 		rEncod.reset();
-		
     }
 	
 	// MAIN AUTONOMOUS METHOD
 	@Override
 	public void autonomousPeriodic() {
-
 		switch (autoSelected) {
 
 		case LEFT:
@@ -121,9 +139,7 @@ public class Robot extends IterativeRobot {
 		case CENTER:
 			autonomousCenter();
 			break;
-
 		}
-
 	}
 
 	private void autonomousLeft() {
@@ -132,9 +148,12 @@ public class Robot extends IterativeRobot {
 
 	private void autonomousCenter() {
 
+		myRobot.setSafetyEnabled(false);
 		// Tell what you do in autonomous middle here
 		//Drive forward until certain distance from center and then put the gear on and back up. 
-		if ( lEncod.get() > 5 * 12 * ticksPerInch) {
+		if ( lEncod.get() < 5 * 12 * ticksPerInch) {
+//			System.out.println("lencode: " + lEncod.get());
+			
 			myRobot.arcadeDrive(1, 0, true);
 		}
 		else {
@@ -146,11 +165,14 @@ public class Robot extends IterativeRobot {
 
 	}
 
+	/******************
+	 * TELEOP
+	 *****************/
+
 	@Override
 	public void teleopInit() {
 		
 	}
-	
 	
 	@Override
 	public void teleopPeriodic() {
@@ -158,7 +180,10 @@ public class Robot extends IterativeRobot {
 		gearDoor();
 		lifter();
 	}
-
+	
+	@Override
+	public void disabledInit(){}
+	
 	// Lifter code
 	private void lifter() {
 		boolean liftStartButton = xbox.getRawButton(4);
