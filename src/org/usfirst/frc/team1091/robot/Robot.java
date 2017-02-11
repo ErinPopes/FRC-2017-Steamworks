@@ -7,13 +7,11 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotDrive;
-import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Relay;
-import edu.wpi.first.wpilibj.Timer;
 import static org.usfirst.frc.team1091.robot.StartingPosition.*;
 
 import java.io.BufferedReader;
@@ -24,7 +22,7 @@ import java.net.URL;
 public class Robot extends IterativeRobot {
 
 	private RobotDrive myRobot;
-	private Joystick xbox; // xbox controller
+	private Joystick xbox; 
 	final double deadZone = 0.02;
 	private CameraServer camera;
 	DriverStation.Alliance color;
@@ -37,30 +35,18 @@ public class Robot extends IterativeRobot {
 	Spark door;
 	Spark climber;
 	Encoder encoder;
-	// Date date;
-	private Encoder lEncod, rEncod; // 20 per rotation
-	private double speed;
+	
+	private Encoder lEncod, rEncod; // 20 per rotation on the encoder, 360 per rotation on the wheel
+	
 
 	SendableChooser<StartingPosition> chooser;
 	StartingPosition autoSelected;
-
-	long lCurrentEncoderVal;
-	long rCurrentEncoderVal;
-	// long lastTime = date.getTime();
-	long lLastEncoderVal;// lEncod.get();
-	long rLastEncoderVal;// rEncod.get();
-
+	
 	float visionCenter;
 	final double ticksPerInch = 360.0 / (4.0 * Math.PI);
 
 	@Override
-	public void robotInit() {
-		rCurrentEncoderVal = 0;
-		lCurrentEncoderVal = 0;
-		lLastEncoderVal = 0;
-		rLastEncoderVal = 0;
-		speed = 0;
-
+	public void robotInit() {	
 		color = DriverStation.getInstance().getAlliance();
 		System.out.print(color.name());
 
@@ -78,7 +64,7 @@ public class Robot extends IterativeRobot {
 		rEncod = new Encoder(5, 6);
 
 		climber = new Spark(5);
-		// date = new Date();
+		
 		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 		camera.setResolution(640, 480);
 		// wheels 4 inches
@@ -102,9 +88,9 @@ public class Robot extends IterativeRobot {
 					in.close();
 					Thread.sleep(100);
 				} catch (ConnectException e) {
-					System.out.println("No connection");
+//					System.out.println("No connection");
 				} catch (Exception e) {
-					e.printStackTrace();
+//					e.printStackTrace();
 				}
 			}
 		};
@@ -148,7 +134,7 @@ public class Robot extends IterativeRobot {
 
 		// Tell what you do in autonomous middle here
 		//Drive forward until certain distance from center and then put the gear on and back up. 
-		if (lCurrentEncoderVal > 5 * 12 * ticksPerInch) {
+		if ( lEncod.get() > 5 * 12 * ticksPerInch) {
 			myRobot.arcadeDrive(1, 0, true);
 		}
 		else {
@@ -165,40 +151,18 @@ public class Robot extends IterativeRobot {
 		
 	}
 	
-	// UPDATE CONTROLS AND SENSORS
+	
 	@Override
 	public void teleopPeriodic() {
-//		lCurrentEncoderVal = lEncod.get();
-//		rCurrentEncoderVal = rEncod.get();
 		xboxDrive(); // For xbox controls
 		gearDoor();
 		lifter();
-		// DriverStation.getInstance(lCurrentEncoderVal);
-		// DriverStationLCD.println("left" + lCurrentEncoderVal);
-		//System.out.print("left" + lCurrentEncoderVal);
-		//System.out.print("right" + rCurrentEncoderVal);
 	}
-
-	// private void updateSpeed() {
-	// if (date.getTime() - lastTime >= 250) {
-	// double distance = (Math.PI/90)*((lCurrentEncoderVal - lLastEncoderVal)
-	// + (rCurrentEncoderVal - rLastEncoderVal))/2;
-	// speed = distance/(0.25); //inches per second
-	// lastTime = date.getTime();
-	// lLastEncoderVal = lCurrentEncoderVal;
-	// rLastEncoderVal = rCurrentEncoderVal;
-	//
-	// }
-	// }
-
 
 	// Lifter code
 	private void lifter() {
 		boolean liftStartButton = xbox.getRawButton(4);
 		boolean liftDownButton = xbox.getRawButton(3);
-
-		// switch to use pwm instead of the spike, because the spike is a lying
-		// piece of sh!t who made your wife cheat on you
 
 		if (liftStartButton) {
 			climber.set(-.9);
@@ -222,24 +186,14 @@ public class Robot extends IterativeRobot {
 		} else {
 			door.set(0);
 		}
-
-		// if doorButton = true &&
-
 	}
 
 	// XBOX DRIVING CONTROLS
 	private void xboxDrive() {
-
-		autoForward(1);
-
 		double yAxis = xbox.getRawAxis(1) * .8;
 		double xAxis = xbox.getRawAxis(0) * -.8;
 		if (!(Math.abs(yAxis) < deadZone) || !(Math.abs(xAxis) < deadZone))
 			myRobot.arcadeDrive(yAxis, xAxis, true);
 	}
-
-	private void autoForward(int distance) {
-
-	}
-
+	
 }
