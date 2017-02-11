@@ -1,10 +1,10 @@
-package org.usfirst.frc.team1091.robot;
+package steps;
 
 public class StepExecutor {
 	private Step[] steps;
 	private int currentStep = 0;
 	
-	StepExecutor(Step[] steps) {
+	public StepExecutor(Step[] steps) {
 		this.steps = steps;
 		
 	}

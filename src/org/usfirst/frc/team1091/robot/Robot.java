@@ -6,6 +6,10 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import steps.DriveForwards;
+import steps.Step;
+import steps.StepExecutor;
+import steps.Turn;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
@@ -22,7 +26,7 @@ import java.net.URL;
 public class Robot extends IterativeRobot {
 
 	private RobotDrive myRobot;
-	private Joystick xbox; 
+	private Joystick xbox;
 	final double deadZone = 0.02;
 	private CameraServer camera;
 	DriverStation.Alliance color;
@@ -36,22 +40,22 @@ public class Robot extends IterativeRobot {
 	Spark climber;
 	Encoder encoder;
 	StepExecutor stepExecutor;
-	
-	private Encoder lEncod, rEncod; // 20 per rotation on the encoder, 360 per rotation on the wheel
-	
+
+	private Encoder lEncod, rEncod; // 20 per rotation on the encoder, 360 per
+									// rotation on the wheel
 
 	SendableChooser<StartingPosition> chooser;
 	StartingPosition autoSelected;
-	
+
 	float visionCenter;
 	final double ticksPerInch = 360.0 / (4.0 * Math.PI);
 
 	/*************************
 	 * ROBOT code that is called once for all modes
 	 */
-	
+
 	@Override
-	public void robotInit() {	
+	public void robotInit() {
 		color = DriverStation.getInstance().getAlliance();
 		System.out.print(color.name());
 
@@ -69,9 +73,10 @@ public class Robot extends IterativeRobot {
 		rEncod = new Encoder(5, 6);
 
 		climber = new Spark(5);
-		
-//		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
-//		camera.setResolution(640, 480);
+
+		// UsbCamera camera =
+		// CameraServer.getInstance().startAutomaticCapture();
+		// camera.setResolution(640, 480);
 		// wheels 4 inches
 
 		chooser = new SendableChooser<>();
@@ -94,86 +99,61 @@ public class Robot extends IterativeRobot {
 					in.close();
 					Thread.sleep(100);
 				} catch (ConnectException e) {
-//					System.out.println("No connection");
+					// System.out.println("No connection");
 				} catch (Exception e) {
-//					e.printStackTrace();
+					// e.printStackTrace();
 				}
 			}
 		};
-		//new Thread(visionUpdater).start();
+		// new Thread(visionUpdater).start();
 	}
-	
+
 	@Override
-	public void robotPeriodic(){
-		
+	public void robotPeriodic() {
+
 	}
-	
+
 	@Override
-	public void disabledPeriodic(){
-		
+	public void disabledPeriodic() {
+
 	}
-	
-	
-/****************
-*	Autonomous
-*****************/
+
+	/****************
+	 * Autonomous
+	 *****************/
 	@Override
 	public void autonomousInit() {
 		autoSelected = chooser.getSelected();
+		Step[] steps;
+
 		switch (autoSelected) {
 
 		case LEFT:
-			Step[] steps = new Step[] {
-					new DriveForwards(myRobot, lEncod, rEncod, 5)	
-				};
-				this.stepExecutor = new StepExecutor(steps);
+			steps = new Step[] { 
+					new DriveForwards(myRobot, lEncod, rEncod, 5),
+					new Turn(myRobot, lEncod, rEncod, 30),
+					new DriveForwards(myRobot, lEncod, rEncod, 2) 
+					};
 			break;
 
 		case RIGHT:
-			Step[] steps = new Step[] {
-					new DriveForwards(myRobot, lEncod, rEncod, 5)	
-				};
-				this.stepExecutor = new StepExecutor(steps);
+			steps = new Step[] { 					new DriveForwards(myRobot, lEncod, rEncod, 5),
+					new Turn(myRobot, lEncod, rEncod, -30),
+					new DriveForwards(myRobot, lEncod, rEncod, 2) };
 			break;
 
-		case CENTER:
-			Step[] steps = new Step[] {
-					new DriveForwards(myRobot, lEncod, rEncod, 5)	
-				};
-				this.stepExecutor = new StepExecutor(steps);
+		default: // CENTER
+			steps = new Step[] { new DriveForwards(myRobot, lEncod, rEncod, 5) };
 			break;
 		}
-		
+		this.stepExecutor = new StepExecutor(steps);
 
-    }
-	
+	}
+
 	// MAIN AUTONOMOUS METHOD
 	@Override
 	public void autonomousPeriodic() {
-	
-	}
-
-	private void autonomousLeft() {
-
-	}
-
-	private void autonomousCenter() {
-
-		myRobot.setSafetyEnabled(false);
-		// Tell what you do in autonomous middle here
-		//Drive forward until certain distance from center and then put the gear on and back up. 
-		if ( lEncod.get() < 5 * 12 * ticksPerInch) {
-//			System.out.println("lencode: " + lEncod.get());
-			
-			myRobot.arcadeDrive(1, 0, true);
-		}
-		else {
-			myRobot.arcadeDrive(0, 0, true);
-		}
-	}
-
-	private void autonomousRight() {
-
+		stepExecutor.execute();
 	}
 
 	/******************
@@ -182,19 +162,20 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void teleopInit() {
-		
+
 	}
-	
+
 	@Override
 	public void teleopPeriodic() {
 		xboxDrive(); // For xbox controls
 		gearDoor();
 		lifter();
 	}
-	
+
 	@Override
-	public void disabledInit(){}
-	
+	public void disabledInit() {
+	}
+
 	// Lifter code
 	private void lifter() {
 		boolean liftStartButton = xbox.getRawButton(4);
@@ -215,9 +196,9 @@ public class Robot extends IterativeRobot {
 		boolean doorOpenButton = xbox.getRawButton(6);
 		boolean doorCloseButton = xbox.getRawButton(5);
 
-		if (doorOpenButton && openLimitSwitch.get() == false){ //&& closedLimitSwitch.get() == true) {
+		if (doorOpenButton && openLimitSwitch.get() == false) {
 			door.set(.4);
-		} else if (doorCloseButton && closedLimitSwitch.get() == false){ //&& openLimitSwitch.get() == true) {
+		} else if (doorCloseButton && closedLimitSwitch.get() == false) {
 			door.set(-.4);
 		} else {
 			door.set(0);
@@ -231,5 +212,5 @@ public class Robot extends IterativeRobot {
 		if (!(Math.abs(yAxis) < deadZone) || !(Math.abs(xAxis) < deadZone))
 			myRobot.arcadeDrive(yAxis, xAxis, true);
 	}
-	
+
 }
