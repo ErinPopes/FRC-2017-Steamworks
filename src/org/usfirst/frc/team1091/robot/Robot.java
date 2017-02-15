@@ -85,13 +85,13 @@ public class Robot extends IterativeRobot {
 
 		chooser = new SendableChooser<>();
 		chooser.addDefault(CENTER.name(), CENTER);
-		for(StartingPosition p : StartingPosition.values()){
+		for (StartingPosition p : StartingPosition.values()) {
 			chooser.addObject(p.name(), p);
 		}
-		
-//		chooser.addDefault(CENTER.name(), CENTER);
-//		chooser.addObject(LEFT.name(), LEFT);
-//		chooser.addObject(RIGHT.name(), RIGHT);
+
+		// chooser.addDefault(CENTER.name(), CENTER);
+		// chooser.addObject(LEFT.name(), LEFT);
+		// chooser.addObject(RIGHT.name(), RIGHT);
 		SmartDashboard.putData("Auto choices", chooser);
 
 		System.out.println("We are actually running");
@@ -219,12 +219,32 @@ public class Robot extends IterativeRobot {
 		}
 	}
 
+	float currentPower = 0;
+	float maxAcc = 10;
+	long lastTime = 0;
+
 	// XBOX DRIVING CONTROLS
 	private void xboxDrive() {
+		long now = System.currentTimeMillis();
+		if (lastTime == 0)
+			lastTime = now;
+
+		// Trevor suggested speed
 		double yAxis = xbox.getRawAxis(1) * .75;
 		double xAxis = xbox.getRawAxis(0) * -.6;
-		if (!(Math.abs(yAxis) < deadZone) || !(Math.abs(xAxis) < deadZone))
-			myRobot.arcadeDrive(yAxis, xAxis, true);
+
+		float timeDiffInSeconds = (now - lastTime) / 1000f;
+
+		lastTime = now;
+
+		if (yAxis > currentPower) {
+			currentPower = (float) Math.max(currentPower + (maxAcc * timeDiffInSeconds), yAxis);
+		} else if (yAxis < currentPower) {
+			currentPower = (float) Math.min(currentPower - (maxAcc * timeDiffInSeconds), yAxis);
+		}
+
+		// if ((Math.abs(yAxis) > deadZone) || (Math.abs(xAxis) > deadZone))
+		myRobot.arcadeDrive(currentPower, xAxis, true);
 	}
 
 }
