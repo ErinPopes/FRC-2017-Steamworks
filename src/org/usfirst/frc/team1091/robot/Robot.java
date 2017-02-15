@@ -137,7 +137,7 @@ public class Robot extends IterativeRobot {
 
 		switch (autoSelected) {
 		case AUTOCENTER:
-			steps = new Step[] { new TurnToVisionCenter(this, myRobot, lEncod, rEncod) };
+			steps = new Step[] { new TurnToVisionCenter(this, myRobot) };
 			break;
 		case RIGHT:
 			steps = new Step[] { new Turn(myRobot, lEncod, rEncod, -12), };
