@@ -12,7 +12,7 @@ import steps.StepExecutor;
 import steps.Turn;
 import steps.TurnToVisionCenter;
 import edu.wpi.first.wpilibj.RobotDrive;
-import edu.wpi.cscore.UsbCamera;
+//import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
@@ -75,12 +75,13 @@ public class Robot extends IterativeRobot {
 
 		climber = new Spark(5);
 
-		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
-		camera.setResolution(640, 480);
-		camera.setBrightness(255);
-		camera.setExposureManual(50);
-		camera.setWhiteBalanceManual(50);
-		camera.enumerateProperties();
+		// UsbCamera camera =
+		// CameraServer.getInstance().startAutomaticCapture();
+		// camera.setResolution(640, 480);
+		// camera.setBrightness(255);
+		// camera.setExposureManual(50);
+		// camera.setWhiteBalanceManual(50);
+		// camera.enumerateProperties();
 		// wheels 4 inches
 
 		chooser = new SendableChooser<>();
@@ -140,7 +141,7 @@ public class Robot extends IterativeRobot {
 			steps = new Step[] { new TurnToVisionCenter(this, myRobot) };
 			break;
 		case RIGHT:
-			steps = new Step[] { new Turn(myRobot, lEncod, rEncod, -12), };
+			steps = new Step[] { new Turn(myRobot, lEncod, rEncod, -12) };
 			break;
 
 		case LEFT:
@@ -220,7 +221,7 @@ public class Robot extends IterativeRobot {
 	}
 
 	float currentPower = 0;
-	float maxAcc = 10;
+	float maxAcc = 2f;
 	long lastTime = 0;
 
 	// XBOX DRIVING CONTROLS
@@ -229,22 +230,24 @@ public class Robot extends IterativeRobot {
 		if (lastTime == 0)
 			lastTime = now;
 
+		float powerIsMaximal = xbox.getRawButton(1) ? 1f : 0.6f;
+
 		// Trevor suggested speed
-		double yAxis = xbox.getRawAxis(1) * .75;
+		double desiredPower = xbox.getRawAxis(1) * powerIsMaximal;
 		double xAxis = xbox.getRawAxis(0) * -.6;
 
-		float timeDiffInSeconds = (now - lastTime) / 1000f;
+		float timeDiffInSeconds = (float) (now - lastTime) / 1000f;
 
 		lastTime = now;
 
-		if (yAxis > currentPower) {
-			currentPower = (float) Math.max(currentPower + (maxAcc * timeDiffInSeconds), yAxis);
-		} else if (yAxis < currentPower) {
-			currentPower = (float) Math.min(currentPower - (maxAcc * timeDiffInSeconds), yAxis);
+		if (desiredPower > currentPower) {
+			currentPower = (float) Math.min(currentPower + (maxAcc * timeDiffInSeconds), desiredPower);
+		} else if (desiredPower < currentPower) {
+			currentPower = (float) Math.max(currentPower - (maxAcc * timeDiffInSeconds), desiredPower);
 		}
 
 		// if ((Math.abs(yAxis) > deadZone) || (Math.abs(xAxis) > deadZone))
-		myRobot.arcadeDrive(currentPower, xAxis, true);
+		myRobot.arcadeDrive(currentPower, xAxis, false);
 	}
 
 }
