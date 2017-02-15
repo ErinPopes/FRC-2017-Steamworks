@@ -8,36 +8,43 @@ public class Turn implements Step {
 	private RobotDrive robotDrive;
 	private Encoder lEncoder;
 	private Encoder rEncoder;
-	private float turnInDegrees;
+	private double turnInInches;
+	final double ticksPerInch = 360.0 / (4.0 * Math.PI);
 
 	boolean hasExec = false;
 
-	public Turn(RobotDrive robotDrive, Encoder lEncoder, Encoder rEncoder, float turnInDegrees) {
+	public Turn(RobotDrive robotDrive, Encoder lEncoder, Encoder rEncoder, double turnInInches) {
 		this.robotDrive = robotDrive;
 		this.lEncoder = lEncoder;
 		this.rEncoder = rEncoder;
-		this.turnInDegrees = turnInDegrees;
+		this.turnInInches = turnInInches;
 	}
 
 	@Override
 	public boolean execute() {
 
-		return true;
-		// TODO: actually turn instead of being just a poser
-		
-//		if (!this.hasExec) {
-//			lEncoder.reset();
-//			rEncoder.reset();
-//			hasExec = true;
-//		} else {
-//			if (lEncoder.get() < this.distance * 12 * ticksPerInch) {
-//				robotDrive.arcadeDrive(0, 0, true);
-//			} else {
-//				robotDrive.arcadeDrive(0, 0, true);
-//				return true;
-//			}
-//		}
-//		return false;
+		if (!this.hasExec) {
+			lEncoder.reset();
+			rEncoder.reset();
+			hasExec = true;
+		} else {
+			if (this.turnInInches < 0) {
+				if (Math.abs(rEncoder.get()) < Math.abs(this.turnInInches * ticksPerInch)) { //RIGHT
+					robotDrive.arcadeDrive(0, -0.5, true);
+				} else {
+					robotDrive.arcadeDrive(0, 0, true);
+					return true;
+				}
+			} else {
+				if (Math.abs(lEncoder.get()) < Math.abs(this.turnInInches * ticksPerInch)) { //LEFT
+					robotDrive.arcadeDrive(0, 0.65, true);
+				} else {
+					robotDrive.arcadeDrive(0, 0, true);
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 }

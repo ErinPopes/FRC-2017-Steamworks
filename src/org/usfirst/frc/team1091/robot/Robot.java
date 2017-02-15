@@ -10,6 +10,7 @@ import steps.DriveForwards;
 import steps.Step;
 import steps.StepExecutor;
 import steps.Turn;
+import steps.TurnToVisionCenter;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
@@ -47,7 +48,7 @@ public class Robot extends IterativeRobot {
 	SendableChooser<StartingPosition> chooser;
 	StartingPosition autoSelected;
 
-	float visionCenter;
+	public float visionCenter;
 	final double ticksPerInch = 360.0 / (4.0 * Math.PI);
 
 	/*************************
@@ -69,20 +70,28 @@ public class Robot extends IterativeRobot {
 		lifterSwitch = new DigitalInput(2);
 		lifterSpike = new Relay(0);
 
-		lEncod = new Encoder(3, 4, true);
-		rEncod = new Encoder(5, 6);
+		lEncod = new Encoder(6, 7, true);
+		rEncod = new Encoder(4, 5);
 
 		climber = new Spark(5);
 
-		// UsbCamera camera =
-		// CameraServer.getInstance().startAutomaticCapture();
-		// camera.setResolution(640, 480);
+		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
+		camera.setResolution(640, 480);
+		camera.setBrightness(255);
+		camera.setExposureManual(50);
+		camera.setWhiteBalanceManual(50);
+		camera.enumerateProperties();
 		// wheels 4 inches
 
 		chooser = new SendableChooser<>();
 		chooser.addDefault(CENTER.name(), CENTER);
-		chooser.addObject(LEFT.name(), LEFT);
-		chooser.addObject(RIGHT.name(), RIGHT);
+		for(StartingPosition p : StartingPosition.values()){
+			chooser.addObject(p.name(), p);
+		}
+		
+//		chooser.addDefault(CENTER.name(), CENTER);
+//		chooser.addObject(LEFT.name(), LEFT);
+//		chooser.addObject(RIGHT.name(), RIGHT);
 		SmartDashboard.putData("Auto choices", chooser);
 
 		System.out.println("We are actually running");
@@ -90,7 +99,7 @@ public class Robot extends IterativeRobot {
 		Runnable visionUpdater = () -> {
 			while (true) {
 				try {
-					URL visionURL = new URL("http://172.21.6.159:5805/");
+					URL visionURL = new URL("http://10.10.91.34:5805/");
 
 					BufferedReader in = new BufferedReader(new InputStreamReader(visionURL.openStream()));
 
@@ -105,7 +114,7 @@ public class Robot extends IterativeRobot {
 				}
 			}
 		};
-		// new Thread(visionUpdater).start();
+		new Thread(visionUpdater).start();
 	}
 
 	@Override
@@ -124,26 +133,31 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void autonomousInit() {
 		autoSelected = chooser.getSelected();
-		Step[] steps;
+		Step[] steps = null;
 
 		switch (autoSelected) {
+		case AUTOCENTER:
+			steps = new Step[] { new TurnToVisionCenter(this, myRobot, lEncod, rEncod) };
+			break;
+		case RIGHT:
+			steps = new Step[] { new Turn(myRobot, lEncod, rEncod, -12), };
+			break;
 
 		case LEFT:
-			steps = new Step[] { 
-					new DriveForwards(myRobot, lEncod, rEncod, 5),
-					new Turn(myRobot, lEncod, rEncod, 30),
-					new DriveForwards(myRobot, lEncod, rEncod, 2) 
-					};
+			steps = new Step[] { new Turn(myRobot, lEncod, rEncod, 24) };
 			break;
 
-		case RIGHT:
-			steps = new Step[] { 					new DriveForwards(myRobot, lEncod, rEncod, 5),
-					new Turn(myRobot, lEncod, rEncod, -30),
-					new DriveForwards(myRobot, lEncod, rEncod, 2) };
+		case CENTER: // CENTER
+			steps = new Step[] { new DriveForwards(myRobot, lEncod, rEncod, 1) };
 			break;
 
-		default: // CENTER
-			steps = new Step[] { new DriveForwards(myRobot, lEncod, rEncod, 5) };
+		case POS1_OR_3:
+			steps = new Step[] { new DriveForwards(myRobot, lEncod, rEncod, 100) };
+			break;
+
+		case POS2:
+			steps = new Step[] { new DriveForwards(myRobot, lEncod, rEncod, 100) };
+		default:
 			break;
 		}
 		this.stepExecutor = new StepExecutor(steps);
@@ -182,9 +196,9 @@ public class Robot extends IterativeRobot {
 		boolean liftDownButton = xbox.getRawButton(3);
 
 		if (liftStartButton) {
-			climber.set(-.9);
+			climber.set(-.3);
 		} else if (liftDownButton) {
-			climber.set(.3);
+			climber.set(.9);
 		} else {
 			climber.set(0);
 		}
@@ -207,8 +221,8 @@ public class Robot extends IterativeRobot {
 
 	// XBOX DRIVING CONTROLS
 	private void xboxDrive() {
-		double yAxis = xbox.getRawAxis(1) * .8;
-		double xAxis = xbox.getRawAxis(0) * -.8;
+		double yAxis = xbox.getRawAxis(1) * .75;
+		double xAxis = xbox.getRawAxis(0) * -.6;
 		if (!(Math.abs(yAxis) < deadZone) || !(Math.abs(xAxis) < deadZone))
 			myRobot.arcadeDrive(yAxis, xAxis, true);
 	}

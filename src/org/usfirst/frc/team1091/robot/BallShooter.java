@@ -6,7 +6,7 @@
 //	Spark motor1,
 //	motor = new Spark(6);
 //
-//	if(true){
+//	while (true){
 //		
 //	}
 //

@@ -15,7 +15,8 @@ public class DriveForwards implements Step {
 		this.robotDrive = robotDrive;
 		this.lEncoder = lEncoder;
 		this.rEncoder = rEncoder;
-		this.distance = distance; //in feet
+		this.distance = distance; //in inches
+		execute();
 	}
 
 	@Override
@@ -25,9 +26,11 @@ public class DriveForwards implements Step {
 			lEncoder.reset();
 			rEncoder.reset();
 			hasExec = true;
+			robotDrive.setSafetyEnabled(false);
 		} else {
-			if (lEncoder.get() < this.distance * 12 * ticksPerInch) {
-				robotDrive.arcadeDrive(1, 0, true);
+			double tickDistance = this.distance * ticksPerInch;
+			if (Math.abs(lEncoder.get()) < Math.abs(tickDistance)) {
+				robotDrive.arcadeDrive(-.5, 0, true);
 			} else {
 				robotDrive.arcadeDrive(0, 0, true);
 				return true;
