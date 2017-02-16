@@ -12,7 +12,7 @@ import steps.StepExecutor;
 import steps.Turn;
 import steps.TurnToVisionCenter;
 import edu.wpi.first.wpilibj.RobotDrive;
-//import edu.wpi.cscore.UsbCamera;
+import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
@@ -75,11 +75,10 @@ public class Robot extends IterativeRobot {
 
 		climber = new Spark(5);
 
-		// UsbCamera camera =
-		// CameraServer.getInstance().startAutomaticCapture();
+		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 		// camera.setResolution(640, 480);
-		// camera.setBrightness(255);
-		// camera.setExposureManual(50);
+		camera.setBrightness(50);
+		camera.setExposureManual(50);
 		// camera.setWhiteBalanceManual(50);
 		// camera.enumerateProperties();
 		// wheels 4 inches
@@ -100,8 +99,9 @@ public class Robot extends IterativeRobot {
 		Runnable visionUpdater = () -> {
 			while (true) {
 				try {
-					URL visionURL = new URL("http://10.10.91.34:5805/");
+					// URL visionURL = new URL("http://10.10.91.34:5805/");
 
+					URL visionURL = new URL("http://10.10.91.106:5805/");
 					BufferedReader in = new BufferedReader(new InputStreamReader(visionURL.openStream()));
 
 					String inputLine = in.readLine();
@@ -234,7 +234,6 @@ public class Robot extends IterativeRobot {
 
 		// Trevor suggested speed
 		double desiredPower = xbox.getRawAxis(1) * powerIsMaximal;
-		double xAxis = xbox.getRawAxis(0) * -.6;
 
 		float timeDiffInSeconds = (float) (now - lastTime) / 1000f;
 
@@ -246,6 +245,19 @@ public class Robot extends IterativeRobot {
 			currentPower = (float) Math.max(currentPower - (maxAcc * timeDiffInSeconds), desiredPower);
 		}
 
+		double xAxis = 0;
+		if (xbox.getRawButton(2)) {
+			float turnpower = 2f * visionCenter;
+			if (turnpower > 0.6)
+				turnpower = 0.6f;
+			if (turnpower < -0.6)
+				turnpower = -0.6f;
+
+			xAxis = -turnpower;
+		} else {
+			xAxis = xbox.getRawAxis(0) * -.6;
+		}
+		
 		// if ((Math.abs(yAxis) > deadZone) || (Math.abs(xAxis) > deadZone))
 		myRobot.arcadeDrive(currentPower, xAxis, false);
 	}

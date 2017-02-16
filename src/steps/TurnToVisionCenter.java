@@ -21,11 +21,11 @@ public class TurnToVisionCenter implements Step {
 	@Override
 	public boolean execute() {
 		float turnpower = visionScale * robot.visionCenter;
-		if (turnpower > 1)
-			turnpower = 1;
-		if (turnpower < -1)
-			turnpower = -1;
-		robotDrive.arcadeDrive(0, turnpower);
+		if (turnpower > 0.6)
+			turnpower = 0.6f;
+		if (turnpower < -0.6)
+			turnpower = -0.6f;
+		robotDrive.arcadeDrive(0, -turnpower);
 		return false;
 	}
 
