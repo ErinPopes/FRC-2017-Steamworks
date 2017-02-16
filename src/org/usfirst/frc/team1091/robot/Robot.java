@@ -77,10 +77,10 @@ public class Robot extends IterativeRobot {
 
 		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 		// camera.setResolution(640, 480);
-		camera.setBrightness(50);
-		camera.setExposureManual(50);
-		// camera.setWhiteBalanceManual(50);
-		// camera.enumerateProperties();
+		camera.setBrightness(20);
+		camera.setExposureManual(20);
+	    camera.setWhiteBalanceManual(50);
+		camera.enumerateProperties();
 		// wheels 4 inches
 
 		chooser = new SendableChooser<>();
@@ -99,9 +99,9 @@ public class Robot extends IterativeRobot {
 		Runnable visionUpdater = () -> {
 			while (true) {
 				try {
-					// URL visionURL = new URL("http://10.10.91.34:5805/");
+					 URL visionURL = new URL("http://10.10.91.34:5805/");
 
-					URL visionURL = new URL("http://10.10.91.106:5805/");
+					//URL visionURL = new URL("http://10.10.91.106:5805/");
 					BufferedReader in = new BufferedReader(new InputStreamReader(visionURL.openStream()));
 
 					String inputLine = in.readLine();
@@ -141,7 +141,7 @@ public class Robot extends IterativeRobot {
 			steps = new Step[] { new TurnToVisionCenter(this, myRobot) };
 			break;
 		case RIGHT:
-			steps = new Step[] { new Turn(myRobot, lEncod, rEncod, -12) };
+			steps = new Step[] {new DriveForwards(myRobot, lEncod, rEncod, 100), new Turn(myRobot, lEncod, rEncod, -12) };
 			break;
 
 		case LEFT:
