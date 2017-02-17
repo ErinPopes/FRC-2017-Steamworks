@@ -15,7 +15,7 @@ public class DriveForwards implements Step {
 		this.robotDrive = robotDrive;
 		this.lEncoder = lEncoder;
 		this.rEncoder = rEncoder;
-		this.distance = distance; //in inches
+		this.distance = distance; // in inches
 		execute();
 	}
 
@@ -29,12 +29,51 @@ public class DriveForwards implements Step {
 			robotDrive.setSafetyEnabled(false);
 		} else {
 			double tickDistance = this.distance * ticksPerInch;
-			if (Math.abs(lEncoder.get()) < Math.abs(tickDistance)) {
-				robotDrive.arcadeDrive(-.5, 0, true);
-			} else {
-				robotDrive.arcadeDrive(0, 0, true);
+			float lMotorPower = -.6f;
+			float rMotorPower = -.6f;
+			int encoderDifference = rEncoder.get() - lEncoder.get();
+
+			System.out.println("Left Encoder:");
+			System.out.println(lEncoder.get());
+			System.out.println("Right Encoder:");
+			System.out.println(rEncoder.get());
+
+			// if (Math.abs(lEncoder.get()) < Math.abs(tickDistance)) {
+			// lMotorPower = -.6f;
+			// }
+			//
+			// if (Math.abs(rEncoder.get()) < Math.abs(tickDistance)) {
+			// rMotorPower = -.6f;
+			// }
+			
+			System.out.println(encoderDifference);
+			if (encoderDifference > 1) { // IF RIGHT > LEFT
+				rMotorPower = lMotorPower + (Math.abs(encoderDifference) / 200);
+				lMotorPower = 0;
+				System.out.println("Drifting");
+			} else if (encoderDifference < -1) { //IF LEFT > RIGHT
+				lMotorPower = rMotorPower + (Math.abs(encoderDifference) / 200);
+				rMotorPower = 0;
+				System.out.println("Drifting the other way");
+			}
+
+			else {
+				System.out.println("Not drifting");
+			}
+			
+			if (Math.abs(lEncoder.get()) > Math.abs(tickDistance) || Math.abs(rEncoder.get()) > Math.abs(tickDistance)) {
+				robotDrive.tankDrive(0, 0);
 				return true;
 			}
+			System.out.println("tickDistance:");
+			System.out.println(tickDistance);
+			
+			
+			robotDrive.tankDrive(lMotorPower, rMotorPower);
+
+//			if (lMotorPower == 0 && rMotorPower == 0) {
+//				return true;
+//			}
 		}
 		return false;
 	}
