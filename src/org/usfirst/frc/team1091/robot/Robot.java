@@ -20,6 +20,7 @@ import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Joystick.AxisType;
 import edu.wpi.first.wpilibj.Relay;
 import static org.usfirst.frc.team1091.robot.StartingPosition.*;
 
@@ -43,6 +44,7 @@ public class Robot extends IterativeRobot {
 	
 	private GearGate gearGate;
 	private ImageInfo imageInfo;
+	private BallDropper ballDropper;
 
 	private Encoder lEncod, rEncod; // 20 per rotation on the encoder, 360 per
 									// rotation on the wheel
@@ -76,6 +78,8 @@ public class Robot extends IterativeRobot {
 		climber = new Spark(5);
 		
 		this.imageInfo = new ImageInfo();
+		
+		this.ballDropper = new BallDropper();
 
 		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 		// camera.setResolution(640, 480);
@@ -196,15 +200,26 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void teleopPeriodic() {
-		xboxDrive(); // For xbox controls
-		gearDoor();
-		lifter();
+		this.xboxDrive(); // For xbox controls
+		this.gearDoor();
+		this.lifter();
+		this.dropper();
 	}
 
 	@Override
 	public void disabledInit() {
 	}
 
+	private void dropper() {
+		boolean dropperButton = xbox.getAxis(AxisType.kZ) > .75;
+		if (dropperButton) {
+			this.ballDropper.drop();
+		}
+		else {
+			this.ballDropper.stop();
+		}
+	}
+	
 	// Lifter code
 	private void lifter() {
 		boolean liftStartButton = xbox.getRawButton(4);
