@@ -6,7 +6,11 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import steps.CloseGate;
+import steps.DriveBackwards;
 import steps.DriveForwards;
+import steps.DriveUntilClose;
+import steps.OpenGate;
 import steps.Step;
 import steps.StepExecutor;
 import steps.Turn;
@@ -38,6 +42,7 @@ public class Robot extends IterativeRobot {
 	StepExecutor stepExecutor;
 	
 	private GearGate gearGate;
+	private ImageInfo imageInfo;
 
 	private Encoder lEncod, rEncod; // 20 per rotation on the encoder, 360 per
 									// rotation on the wheel
@@ -70,6 +75,7 @@ public class Robot extends IterativeRobot {
 
 		climber = new Spark(5);
 		
+		this.imageInfo = new ImageInfo();
 
 		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 		// camera.setResolution(640, 480);
@@ -103,7 +109,8 @@ public class Robot extends IterativeRobot {
 					BufferedReader in = new BufferedReader(new InputStreamReader(visionURL.openStream()));
 
 					String inputLine = in.readLine();
-					visionCenter = Float.parseFloat(inputLine);
+					this.imageInfo.update(inputLine);
+					
 					in.close();
 					Thread.sleep(100);
 				} catch (ConnectException e) {
@@ -150,7 +157,13 @@ public class Robot extends IterativeRobot {
 			break;
 
 		case CENTER: // CENTER
-			steps = new Step[] { new DriveForwards(myRobot, lEncod, rEncod, 200) };
+			steps = new Step[] 
+					{ 
+						new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo),
+						new OpenGate(this.gearGate),
+						new DriveBackwards(myRobot, lEncod, rEncod, 10),
+						new CloseGate(this.gearGate)
+					};
 			break;
 
 		case POS1_OR_3:

@@ -3,20 +3,13 @@ package steps;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotDrive;
 
-public class DriveForwards implements Step {
-	private RobotDrive robotDrive;
-	private Encoder lEncoder;
-	private Encoder rEncoder;
+public class DriveBackwards extends Drive {
 	private float distance;
 	boolean hasExec = false;
-	final double ticksPerInch = 360.0 / (4.0 * Math.PI);
 
-	public DriveForwards(RobotDrive robotDrive, Encoder lEncoder, Encoder rEncoder, float distance) {
-		this.robotDrive = robotDrive;
-		this.lEncoder = lEncoder;
-		this.rEncoder = rEncoder;
-		this.distance = distance; //in inches
-		execute();
+	public DriveBackwards(RobotDrive robotDrive, Encoder lEncoder, Encoder rEncoder, float distance) {
+		super(robotDrive, lEncoder, rEncoder);
+		this.distance = distance; // in inches
 	}
 
 	@Override
@@ -30,7 +23,7 @@ public class DriveForwards implements Step {
 		} else {
 			double tickDistance = this.distance * ticksPerInch;
 			if (Math.abs(lEncoder.get()) < Math.abs(tickDistance)) {
-				robotDrive.arcadeDrive(-.5, 0, true);
+				robotDrive.arcadeDrive(.5, 0, true);
 			} else {
 				robotDrive.arcadeDrive(0, 0, true);
 				return true;
