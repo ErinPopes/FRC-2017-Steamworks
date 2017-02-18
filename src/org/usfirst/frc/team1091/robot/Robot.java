@@ -31,20 +31,17 @@ public class Robot extends IterativeRobot {
 	final double deadZone = 0.02;
 	private CameraServer camera;
 	DriverStation.Alliance color;
-	DigitalInput openLimitSwitch; // Limit Switch is pushed in when door is
-									// open. False when door is open.
-	DigitalInput closedLimitSwitch; // Limit Switch is pushed in when door is
-									// closed. False when door is closed.
 	DigitalInput lifterSwitch;
 	Relay lifterSpike;
-	Spark door;
 	Spark climber;
 	Encoder encoder;
 	StepExecutor stepExecutor;
+	
+	private GearGate gearGate;
 
 	private Encoder lEncod, rEncod; // 20 per rotation on the encoder, 360 per
 									// rotation on the wheel
-
+	
 	SendableChooser<StartingPosition> chooser;
 	StartingPosition autoSelected;
 
@@ -64,16 +61,15 @@ public class Robot extends IterativeRobot {
 		myRobot.setExpiration(0.1);
 		xbox = new Joystick(0);
 
-		openLimitSwitch = new DigitalInput(0);
-		closedLimitSwitch = new DigitalInput(1);
-		door = new Spark(4);
 		lifterSwitch = new DigitalInput(2);
 		lifterSpike = new Relay(0);
+		this.gearGate = new GearGate();
 
 		lEncod = new Encoder(6, 7, true);
 		rEncod = new Encoder(4, 5);
 
 		climber = new Spark(5);
+		
 
 		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 		// camera.setResolution(640, 480);
@@ -83,6 +79,8 @@ public class Robot extends IterativeRobot {
 		camera.enumerateProperties();
 		// wheels 4 inches
 
+
+		
 		chooser = new SendableChooser<>();
 		chooser.addDefault(CENTER.name(), CENTER);
 		for (StartingPosition p : StartingPosition.values()) {
@@ -141,15 +139,18 @@ public class Robot extends IterativeRobot {
 			steps = new Step[] { new TurnToVisionCenter(this, myRobot) };
 			break;
 		case RIGHT:
-			steps = new Step[] {new DriveForwards(myRobot, lEncod, rEncod, 100), new Turn(myRobot, lEncod, rEncod, -12) };
+			steps = new Step[] {
+					new DriveForwards(myRobot, lEncod, rEncod, 100), 
+					new Turn(myRobot, lEncod, rEncod, -12) 
+					};
 			break;
 
 		case LEFT:
-			steps = new Step[] { new Turn(myRobot, lEncod, rEncod, 24) };
+			steps = new Step[] {new DriveForwards(myRobot, lEncod, rEncod, 100), new Turn(myRobot, lEncod, rEncod, 24) };
 			break;
 
 		case CENTER: // CENTER
-			steps = new Step[] { new DriveForwards(myRobot, lEncod, rEncod, 1) };
+			steps = new Step[] { new DriveForwards(myRobot, lEncod, rEncod, 200) };
 			break;
 
 		case POS1_OR_3:
@@ -208,15 +209,18 @@ public class Robot extends IterativeRobot {
 
 	// Button controls
 	private void gearDoor() {
+		
 		boolean doorOpenButton = xbox.getRawButton(6);
 		boolean doorCloseButton = xbox.getRawButton(5);
-
-		if (doorOpenButton && openLimitSwitch.get() == false) {
-			door.set(.4);
-		} else if (doorCloseButton && closedLimitSwitch.get() == false) {
-			door.set(-.4);
-		} else {
-			door.set(0);
+		
+		if (doorOpenButton) {
+			this.gearGate.openDoor();
+		}
+		else if (doorCloseButton) {
+			this.gearGate.closeDoor();
+		}
+		else {
+			this.gearGate.stopDoor();
 		}
 	}
 
