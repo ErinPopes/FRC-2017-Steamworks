@@ -146,18 +146,26 @@ public class Robot extends IterativeRobot {
 		Step[] steps = null;
 
 		switch (autoSelected) {
-		case AUTOCENTER:
-			steps = new Step[] { new TurnToVisionCenter(this, myRobot) };
-			break;
 		case RIGHT:
 			steps = new Step[] {
-					new DriveForwards(myRobot, lEncod, rEncod, 100), 
-					new Turn(myRobot, lEncod, rEncod, -12) 
+						new DriveForwards(myRobot, lEncod, rEncod, 100), 
+						new Turn(myRobot, lEncod, rEncod, -24),
+						new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo),
+						new OpenGate(this.gearGate),
+						new DriveBackwards(myRobot, lEncod, rEncod, 10),
+						new CloseGate(this.gearGate)
 					};
 			break;
 
 		case LEFT:
-			steps = new Step[] {new DriveForwards(myRobot, lEncod, rEncod, 100), new Turn(myRobot, lEncod, rEncod, 24) };
+			steps = new Step[] {
+						new DriveForwards(myRobot, lEncod, rEncod, 100), 
+						new Turn(myRobot, lEncod, rEncod, 24),
+						new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo),
+						new OpenGate(this.gearGate),
+						new DriveBackwards(myRobot, lEncod, rEncod, 10),
+						new CloseGate(this.gearGate)
+					};
 			break;
 
 		case CENTER: // CENTER
@@ -169,18 +177,11 @@ public class Robot extends IterativeRobot {
 						new CloseGate(this.gearGate)
 					};
 			break;
-
-		case POS1_OR_3:
-			steps = new Step[] { new DriveForwards(myRobot, lEncod, rEncod, 100) };
-			break;
-
-		case POS2:
-			steps = new Step[] { new DriveForwards(myRobot, lEncod, rEncod, 100) };
 		default:
 			break;
 		}
+		
 		this.stepExecutor = new StepExecutor(steps);
-
 	}
 
 	// MAIN AUTONOMOUS METHOD
