@@ -19,14 +19,22 @@ public class GearGate {
 		this.closedLimitSwitch = new DigitalInput(1);
 		this.door = new Spark(4);
 	}
-
+	
+	public boolean closedSwitch(){
+		return closedLimitSwitch.get();
+	}
+	
+	public boolean openSwitch(){
+		return openLimitSwitch.get();
+	}
+	
 	public void openDoor() {
 		if (this.openLimitSwitch.get()) {
 			this.doorOpen = true;
 			SmartDashboard.putBoolean("Door Closed", doorOpen);
 		}
 		else {
-			this.door.set(.4);
+			this.door.set(0.9);
 		}
 	}
 	
@@ -36,7 +44,7 @@ public class GearGate {
 			SmartDashboard.putBoolean("Door Closed", doorOpen);
 		}
 		else {
-			this.door.set(-.4);
+			this.door.set(-.9);
 		}
 	}
 	
@@ -46,5 +54,10 @@ public class GearGate {
 	
 	public boolean isDoorOpen() {
 		return this.doorOpen;
+	}
+
+	public boolean isDoorClosed() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

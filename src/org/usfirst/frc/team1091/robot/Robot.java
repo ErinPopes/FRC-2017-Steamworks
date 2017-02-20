@@ -242,10 +242,10 @@ public class Robot extends IterativeRobot {
 		boolean doorOpenButton = xbox.getRawButton(6);
 		boolean doorCloseButton = xbox.getRawButton(5);
 		
-		if (doorOpenButton) {
+		if (doorOpenButton && !gearGate.openSwitch()) {
 			this.gearGate.openDoor();
 		}
-		else if (doorCloseButton) {
+		else if (doorCloseButton && !gearGate.closedSwitch()) {
 			this.gearGate.closeDoor();
 		}
 		else {
@@ -254,7 +254,7 @@ public class Robot extends IterativeRobot {
 	}
 
 	float currentPower = 0;
-	float maxAcc = 2f;
+	float maxAcc = 8f;
 	long lastTime = 0;
 
 	// XBOX DRIVING CONTROLS
