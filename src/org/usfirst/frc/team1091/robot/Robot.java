@@ -52,7 +52,6 @@ public class Robot extends IterativeRobot {
 	SendableChooser<StartingPosition> chooser;
 	StartingPosition autoSelected;
 
-	public float visionCenter;
 	final double ticksPerInch = 360.0 / (4.0 * Math.PI);
 
 	/*************************
@@ -101,7 +100,6 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putData("Auto choices", chooser);
 
 		System.out.println("We are actually running");
-		visionCenter = 0;
 		Runnable visionUpdater = () -> {
 			while (true) {
 				try {
@@ -267,13 +265,14 @@ public class Robot extends IterativeRobot {
 
 		double xAxis = 0;
 		if (xbox.getRawButton(2)) {
-			float turnpower = 2f * visionCenter;
+			float turnpower = 2f * imageInfo.getCenter();
 			if (turnpower > 0.6)
 				turnpower = 0.6f;
 			if (turnpower < -0.6)
 				turnpower = -0.6f;
 
 			xAxis = -turnpower;
+			SmartDashboard.putNumber("turn", xAxis);
 		} else {
 			xAxis = xbox.getRawAxis(0) * -.6;
 		}

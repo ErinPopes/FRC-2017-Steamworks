@@ -10,11 +10,11 @@ public class ImageInfo {
 		if (input != null && !input.isEmpty()) {
 			String[] split = input.split(",");
 			if (split.length == 2) {
-				center = Float.parseFloat(split[0]);
+				center = Float.parseFloat(split[0]) - 0.1f;
 				distance = Float.parseFloat(split[1]);
 
+				SmartDashboard.putNumber("Center", this.center);
 				SmartDashboard.putNumber("Distance", this.distance);
-				SmartDashboard.putString("input string", input);
 			}
 		}
 	}
