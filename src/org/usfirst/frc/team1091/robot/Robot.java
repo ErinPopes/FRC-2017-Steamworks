@@ -41,14 +41,14 @@ public class Robot extends IterativeRobot {
 	Spark climber;
 	Encoder encoder;
 	StepExecutor stepExecutor;
-	
+
 	private GearGate gearGate;
 	private ImageInfo imageInfo;
 	private BallDropper ballDropper;
 
 	private Encoder lEncod, rEncod; // 20 per rotation on the encoder, 360 per
 									// rotation on the wheel
-	
+
 	SendableChooser<StartingPosition> chooser;
 	StartingPosition autoSelected;
 
@@ -76,21 +76,19 @@ public class Robot extends IterativeRobot {
 		rEncod = new Encoder(4, 5);
 
 		climber = new Spark(5);
-		
+
 		this.imageInfo = new ImageInfo();
-		
+
 		this.ballDropper = new BallDropper();
 
 		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 		// camera.setResolution(640, 480);
 		camera.setBrightness(20);
 		camera.setExposureManual(20);
-	    camera.setWhiteBalanceManual(50);
+		camera.setWhiteBalanceManual(50);
 		camera.enumerateProperties();
 		// wheels 4 inches
 
-
-		
 		chooser = new SendableChooser<>();
 		chooser.addDefault(CENTER.name(), CENTER);
 		for (StartingPosition p : StartingPosition.values()) {
@@ -107,14 +105,14 @@ public class Robot extends IterativeRobot {
 		Runnable visionUpdater = () -> {
 			while (true) {
 				try {
-					 URL visionURL = new URL("http://10.10.91.34:5805/");
+					URL visionURL = new URL("http://10.10.91.34:5805/");
 
-					//URL visionURL = new URL("http://10.10.91.106:5805/");
+					// URL visionURL = new URL("http://10.10.91.106:5805/");
 					BufferedReader in = new BufferedReader(new InputStreamReader(visionURL.openStream()));
 
 					String inputLine = in.readLine();
 					this.imageInfo.update(inputLine);
-					
+
 					in.close();
 					Thread.sleep(100);
 				} catch (ConnectException e) {
@@ -147,40 +145,32 @@ public class Robot extends IterativeRobot {
 
 		switch (autoSelected) {
 		case RIGHT:
-			steps = new Step[] {
-						new DriveForwards(myRobot, lEncod, rEncod, 100), 
-						new Turn(myRobot, lEncod, rEncod, -24),
-						new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo),
-						new OpenGate(this.gearGate),
-						new DriveBackwards(myRobot, lEncod, rEncod, 10),
-						new CloseGate(this.gearGate)
-					};
+			steps = new Step[] { new DriveForwards(myRobot, lEncod, rEncod, 100),
+					new Turn(myRobot, lEncod, rEncod, -24),
+					new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo), new OpenGate(this.gearGate),
+					new DriveBackwards(myRobot, lEncod, rEncod, 10), new CloseGate(this.gearGate) };
 			break;
 
 		case LEFT:
-			steps = new Step[] {
-						new DriveForwards(myRobot, lEncod, rEncod, 100), 
-						new Turn(myRobot, lEncod, rEncod, 24),
-						new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo),
-						new OpenGate(this.gearGate),
-						new DriveBackwards(myRobot, lEncod, rEncod, 10),
-						new CloseGate(this.gearGate)
-					};
+			steps = new Step[] { new DriveForwards(myRobot, lEncod, rEncod, 100), new Turn(myRobot, lEncod, rEncod, 24),
+					new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo), new OpenGate(this.gearGate),
+					new DriveBackwards(myRobot, lEncod, rEncod, 10), new CloseGate(this.gearGate) };
 			break;
 
 		case CENTER: // CENTER
-			steps = new Step[] 
-					{ 
-						new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo),
-						new OpenGate(this.gearGate),
-						new DriveBackwards(myRobot, lEncod, rEncod, 10),
-						new CloseGate(this.gearGate)
-					};
+			steps = new Step[] { new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo),
+					new OpenGate(this.gearGate), new DriveBackwards(myRobot, lEncod, rEncod, 10),
+					new CloseGate(this.gearGate) };
 			break;
+		case DRIVE_FORWARDS_WITH_NO_GEAR:
+			steps = new Step[] { new DriveForwards(myRobot, lEncod, rEncod, 100) };
+			break;
+		case DO_NOTHING_ATALL:
+			steps = new Step[0];
 		default:
 			break;
 		}
-		
+
 		this.stepExecutor = new StepExecutor(steps);
 	}
 
@@ -215,12 +205,11 @@ public class Robot extends IterativeRobot {
 		boolean dropperButton = xbox.getAxis(AxisType.kZ) > .75;
 		if (dropperButton) {
 			this.ballDropper.drop();
-		}
-		else {
+		} else {
 			this.ballDropper.stop();
 		}
 	}
-	
+
 	// Lifter code
 	private void lifter() {
 		boolean liftStartButton = xbox.getRawButton(4);
@@ -238,17 +227,15 @@ public class Robot extends IterativeRobot {
 
 	// Button controls
 	private void gearDoor() {
-		
+
 		boolean doorOpenButton = xbox.getRawButton(6);
 		boolean doorCloseButton = xbox.getRawButton(5);
-		
+
 		if (doorOpenButton && !gearGate.openSwitch()) {
 			this.gearGate.openDoor();
-		}
-		else if (doorCloseButton && !gearGate.closedSwitch()) {
+		} else if (doorCloseButton && !gearGate.closedSwitch()) {
 			this.gearGate.closeDoor();
-		}
-		else {
+		} else {
 			this.gearGate.stopDoor();
 		}
 	}
@@ -290,7 +277,7 @@ public class Robot extends IterativeRobot {
 		} else {
 			xAxis = xbox.getRawAxis(0) * -.6;
 		}
-		
+
 		// if ((Math.abs(yAxis) > deadZone) || (Math.abs(xAxis) > deadZone))
 		myRobot.arcadeDrive(currentPower, xAxis, false);
 	}

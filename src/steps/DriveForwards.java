@@ -30,7 +30,7 @@ public class DriveForwards implements Step {
 		} else {
 			double tickDistance = this.distance * ticksPerInch;
 			if (Math.abs(lEncoder.get()) < Math.abs(tickDistance)) {
-				robotDrive.arcadeDrive(-.5, 0, true);
+				robotDrive.arcadeDrive(-.8, 0.3, true); //Trust in the magic number
 			} else {
 				robotDrive.arcadeDrive(0, 0, true);
 				return true;
