@@ -143,22 +143,36 @@ public class Robot extends IterativeRobot {
 
 		switch (autoSelected) {
 		case RIGHT:
-			steps = new Step[] { new DriveForwards(myRobot, lEncod, rEncod, 100),
-					new Turn(myRobot, lEncod, rEncod, -24),
-					new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo), new OpenGate(this.gearGate),
-					new DriveBackwards(myRobot, lEncod, rEncod, 10), new CloseGate(this.gearGate) };
+			steps = new Step[] { 
+						new DriveForwards(myRobot, lEncod, rEncod, 90),
+						new Turn(myRobot, lEncod, rEncod, 7),
+						new TurnToVisionCenter(this.imageInfo, myRobot),
+						new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo), 
+						new OpenGate(this.gearGate),
+						new DriveBackwards(myRobot, lEncod, rEncod, 15), 
+						new CloseGate(this.gearGate) 
+					};
 			break;
 
 		case LEFT:
-			steps = new Step[] { new DriveForwards(myRobot, lEncod, rEncod, 100), new Turn(myRobot, lEncod, rEncod, 24),
-					new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo), new OpenGate(this.gearGate),
-					new DriveBackwards(myRobot, lEncod, rEncod, 10), new CloseGate(this.gearGate) };
+			steps = new Step[] { 
+						new DriveForwards(myRobot, lEncod, rEncod, 90), 
+						new Turn(myRobot, lEncod, rEncod, -7),
+						new TurnToVisionCenter(this.imageInfo, myRobot),
+						new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo), 
+						new OpenGate(this.gearGate),
+						new DriveBackwards(myRobot, lEncod, rEncod, 15), 
+						new CloseGate(this.gearGate) 
+					};
 			break;
 
 		case CENTER: // CENTER
-			steps = new Step[] { new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo),
-					new OpenGate(this.gearGate), new DriveBackwards(myRobot, lEncod, rEncod, 10),
-					new CloseGate(this.gearGate) };
+			steps = new Step[] { 
+					new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo),
+					new OpenGate(this.gearGate), 
+					new DriveBackwards(myRobot, lEncod, rEncod, 10),
+					new CloseGate(this.gearGate) 
+					};
 			break;
 		case DRIVE_FORWARDS_WITH_NO_GEAR:
 			steps = new Step[] { new DriveForwards(myRobot, lEncod, rEncod, 100) };
@@ -226,12 +240,12 @@ public class Robot extends IterativeRobot {
 	// Button controls
 	private void gearDoor() {
 
-		boolean doorOpenButton = xbox.getRawButton(6);
-		boolean doorCloseButton = xbox.getRawButton(5);
+		boolean doorOpenButton = xbox.getRawButton(5);
+		boolean doorCloseButton = xbox.getRawButton(6);
 
-		if (doorOpenButton && !gearGate.openSwitch()) {
+		if (doorOpenButton ) {
 			this.gearGate.openDoor();
-		} else if (doorCloseButton && !gearGate.closedSwitch()) {
+		} else if (doorCloseButton) {
 			this.gearGate.closeDoor();
 		} else {
 			this.gearGate.stopDoor();

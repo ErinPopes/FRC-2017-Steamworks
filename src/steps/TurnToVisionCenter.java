@@ -27,7 +27,8 @@ public class TurnToVisionCenter implements Step {
 		if (turnpower < -0.6)
 			turnpower = -0.6f;
 		robotDrive.arcadeDrive(0, -turnpower);
-		return false;
+		
+		return Math.abs(imageInfo.getCenter()) < .1;
 	}
 
 }

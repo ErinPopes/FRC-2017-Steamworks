@@ -11,11 +11,7 @@ public class CloseGate implements Step {
 
 	@Override
 	public boolean execute() {
-		if (!this.gearGate.isDoorOpen()) {
-			return true;
-		} else {
-			this.gearGate.closeDoor();
-			return false;
-		}
+		this.gearGate.closeDoor();
+		return this.gearGate.isDoorClosed();
 	}
 }

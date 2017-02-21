@@ -12,12 +12,7 @@ public class OpenGate implements Step {
 	
 	@Override
 	public boolean execute() {
-		if (this.gearGate.isDoorOpen()) {
-			return true;
-		}
-		else {
-			this.gearGate.openDoor();
-			return false;
-		}
+		this.gearGate.openDoor();
+		return this.gearGate.isDoorOpen();
 	}
 }

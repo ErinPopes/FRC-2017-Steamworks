@@ -23,16 +23,17 @@ public class DriveUntilClose extends Drive {
 		if (turnpower < -0.6)
 			turnpower = -0.6f;
 
-		if (this.imageInfo.getDistance() > 15) {
+		if (this.imageInfo.getDistance() > 30) {
 			robotDrive.arcadeDrive(-.7, turnpower);
 			return false;
-		} else if (this.imageInfo.getDistance() > 10) {
-			robotDrive.arcadeDrive(-.5, turnpower);
+		} else if (this.imageInfo.getDistance() > 20) {
+			robotDrive.arcadeDrive(-.6, turnpower);
 			return false;
 		} else if (this.imageInfo.getDistance() > 5) {
-			robotDrive.arcadeDrive(-.2, turnpower);
+			robotDrive.arcadeDrive(-.55, turnpower);
 			return false;
 		} else {
+			robotDrive.arcadeDrive(0, 0);
 			return true;
 		}
 	}

@@ -30,14 +30,14 @@ public class Turn implements Step {
 		} else {
 			if (this.turnInInches < 0) {
 				if (Math.abs(rEncoder.get()) < Math.abs(this.turnInInches * ticksPerInch)) { //RIGHT
-					robotDrive.arcadeDrive(0, -0.5, true);
+					robotDrive.arcadeDrive(0, -0.70, true);
 				} else {
 					robotDrive.arcadeDrive(0, 0, true);
 					return true;
 				}
 			} else {
 				if (Math.abs(lEncoder.get()) < Math.abs(this.turnInInches * ticksPerInch)) { //LEFT
-					robotDrive.arcadeDrive(0, 0.65, true);
+					robotDrive.arcadeDrive(0, 0.70, true);
 				} else {
 					robotDrive.arcadeDrive(0, 0, true);
 					return true;
