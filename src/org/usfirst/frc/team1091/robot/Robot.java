@@ -41,7 +41,8 @@ public class Robot extends IterativeRobot {
 	Relay lifterSpike;
 	Spark climber;
 	Encoder encoder;
-	StepExecutor stepExecutor;
+	private StepExecutor stepExecutor;
+	private StepExecutor placeGear = null;
 
 	private GearGate gearGate;
 	private ImageInfo imageInfo;
@@ -157,12 +158,16 @@ public class Robot extends IterativeRobot {
 			steps.add(new CloseGate(this.gearGate));
 			steps.add(new TurnToVisionCenter(this.imageInfo, myRobot));
 			steps.add(new Turn(myRobot, lEncod, rEncod, -7));
-			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 24)); // TODO: boost this
+			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 24)); // TODO:
+																		// boost
+																		// this
 
-			if(boilerPosition == BoilerPosition.BOILER_IS_ON_MY_RIGHT){
+			if (boilerPosition == BoilerPosition.BOILER_IS_ON_MY_RIGHT) {
 				steps.add(new Turn(myRobot, lEncod, rEncod, 4));
 			}
-			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 24)); //TODO: Boost this
+			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 24)); // TODO:
+																		// Boost
+																		// this
 			break;
 
 		case LEFT:
@@ -174,12 +179,16 @@ public class Robot extends IterativeRobot {
 			steps.add(new DriveBackwards(myRobot, lEncod, rEncod, 24));
 			steps.add(new CloseGate(this.gearGate));
 			steps.add(new Turn(myRobot, lEncod, rEncod, 7));
-			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 24)); // TODO: boost this
-			
-			if(boilerPosition == BoilerPosition.BOILER_IS_ON_MY_LEFT){
+			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 24)); // TODO:
+																		// boost
+																		// this
+
+			if (boilerPosition == BoilerPosition.BOILER_IS_ON_MY_LEFT) {
 				steps.add(new Turn(myRobot, lEncod, rEncod, -4));
 			}
-			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 24)); // TODO: boost this
+			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 24)); // TODO:
+																		// boost
+																		// this
 			break;
 
 		case CENTER_AND_STOP: // CENTER
@@ -197,14 +206,17 @@ public class Robot extends IterativeRobot {
 			steps.add(new Turn(myRobot, lEncod, rEncod, 14));
 			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 72));
 			steps.add(new Turn(myRobot, lEncod, rEncod, -14));
-			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 24));//boost this
-			if(boilerPosition == BoilerPosition.BOILER_IS_ON_MY_LEFT){
+			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 24));// boost
+																		// this
+			if (boilerPosition == BoilerPosition.BOILER_IS_ON_MY_LEFT) {
 				steps.add(new Turn(myRobot, lEncod, rEncod, -4));
 			}
-			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 24)); // TODO: boost this
-			
-			break;			
-			
+			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 24)); // TODO:
+																		// boost
+																		// this
+
+			break;
+
 		case CENTER_AND_RIGHT_ROUND: // CENTER
 			steps.add(new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo));
 			steps.add(new OpenGate(this.gearGate));
@@ -213,13 +225,16 @@ public class Robot extends IterativeRobot {
 			steps.add(new Turn(myRobot, lEncod, rEncod, -14));
 			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 72));
 			steps.add(new Turn(myRobot, lEncod, rEncod, 14));
-			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 24));//boost this
-			if(boilerPosition == BoilerPosition.BOILER_IS_ON_MY_RIGHT){
+			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 24));// boost
+																		// this
+			if (boilerPosition == BoilerPosition.BOILER_IS_ON_MY_RIGHT) {
 				steps.add(new Turn(myRobot, lEncod, rEncod, 4));
 			}
-			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 24)); //TODO: Boost this
+			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 24)); // TODO:
+																		// Boost
+																		// this
 			break;
-			
+
 		case DRIVE_FORWARDS_WITH_NO_GEAR:
 			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 100));
 			break;
@@ -248,12 +263,29 @@ public class Robot extends IterativeRobot {
 
 	}
 
+
 	@Override
 	public void teleopPeriodic() {
-		this.xboxDrive(); // For xbox controls
-		this.gearDoor();
-		this.lifter();
-		this.dropper();
+		if (xbox.getRawButton(2)) {
+			if (placeGear == null) {
+
+				ArrayList<Step> steps = new ArrayList<>();
+				steps.add(new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo));
+				steps.add(new OpenGate(this.gearGate));
+				steps.add(new DriveBackwards(myRobot, lEncod, rEncod, 10));
+				steps.add(new CloseGate(this.gearGate));
+				placeGear = new StepExecutor(steps);
+			}
+			placeGear.execute();
+
+		} else {
+			placeGear = null;
+			// Manual Control
+			this.xboxDrive(); // For xbox controls
+			this.gearDoor();
+			this.lifter();
+			this.dropper();
+		}
 	}
 
 	@Override
@@ -325,18 +357,18 @@ public class Robot extends IterativeRobot {
 		}
 
 		double xAxis = 0;
-		if (xbox.getRawButton(2)) {
-			float turnpower = 2f * imageInfo.getCenter();
-			if (turnpower > 0.6)
-				turnpower = 0.6f;
-			if (turnpower < -0.6)
-				turnpower = -0.6f;
-
-			xAxis = -turnpower;
-			SmartDashboard.putNumber("turn", xAxis);
-		} else {
-			xAxis = xbox.getRawAxis(0) * -.6;
-		}
+		// if (xbox.getRawButton(2)) {
+		// float turnpower = 2f * imageInfo.getCenter();
+		// if (turnpower > 0.6)
+		// turnpower = 0.6f;
+		// if (turnpower < -0.6)
+		// turnpower = -0.6f;
+		//
+		// xAxis = -turnpower;
+		// SmartDashboard.putNumber("turn", xAxis);
+		// } else {
+		xAxis = xbox.getRawAxis(0) * -.6;
+		// }
 
 		// if ((Math.abs(yAxis) > deadZone) || (Math.abs(xAxis) > deadZone))
 		myRobot.arcadeDrive(currentPower, xAxis, false);
