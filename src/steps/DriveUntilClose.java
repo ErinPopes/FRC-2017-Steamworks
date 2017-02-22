@@ -14,7 +14,9 @@ public class DriveUntilClose extends Drive {
 		super(robotDrive, lEncoder, rEncoder);
 		this.imageInfo = imageInfo;
 	}
-
+	
+	boolean hasSeen = false;
+	
 	@Override
 	public boolean execute() {
 		float turnpower = -visionScale * this.imageInfo.getCenter();
@@ -22,15 +24,21 @@ public class DriveUntilClose extends Drive {
 			turnpower = 0.6f;
 		if (turnpower < -0.6)
 			turnpower = -0.6f;
-
+		if(this.imageInfo.getDistance() > 100 && hasSeen)
+		{
+			robotDrive.arcadeDrive(0,0);
+			return true;
+		}
 		if (this.imageInfo.getDistance() > 30) {
 			robotDrive.arcadeDrive(-.7, turnpower);
 			return false;
 		} else if (this.imageInfo.getDistance() > 20) {
-			robotDrive.arcadeDrive(-.6, turnpower);
+			hasSeen=true;
+			robotDrive.arcadeDrive(-.65, turnpower);
 			return false;
 		} else if (this.imageInfo.getDistance() > 5) {
-			robotDrive.arcadeDrive(-.55, turnpower);
+			hasSeen=true;
+			robotDrive.arcadeDrive(-.6, turnpower);
 			return false;
 		} else {
 			robotDrive.arcadeDrive(0, 0);

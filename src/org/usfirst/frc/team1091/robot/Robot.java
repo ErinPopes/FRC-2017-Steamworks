@@ -149,46 +149,47 @@ public class Robot extends IterativeRobot {
 
 		switch (startingPostition) {
 		case RIGHT:
-			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 90));
+			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 98));
 			steps.add(new Turn(myRobot, lEncod, rEncod, 7));
 			steps.add(new TurnToVisionCenter(this.imageInfo, myRobot));
 			steps.add(new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo));
 			steps.add(new OpenGate(this.gearGate));
-			steps.add(new DriveBackwards(myRobot, lEncod, rEncod, 24));
+			steps.add(new DriveBackwards(myRobot, lEncod, rEncod, 72));
 			steps.add(new CloseGate(this.gearGate));
 			steps.add(new TurnToVisionCenter(this.imageInfo, myRobot));
-			steps.add(new Turn(myRobot, lEncod, rEncod, -7));
-			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 24)); // TODO:
+			steps.add(new Turn(myRobot, lEncod, rEncod, -16));
+			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 108)); // TODO:
 																		// boost
 																		// this
 
-			if (boilerPosition == BoilerPosition.BOILER_IS_ON_MY_RIGHT) {
-				steps.add(new Turn(myRobot, lEncod, rEncod, 4));
-			}
-			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 24)); // TODO:
-																		// Boost
-																		// this
+//			if (boilerPosition == BoilerPosition.BOILER_IS_ON_MY_RIGHT) {
+//				steps.add(new Turn(myRobot, lEncod, rEncod, 4));
+//			}
+//			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 24)); // TODO:
+//																		// Boost
+//																		// this
 			break;
 
 		case LEFT:
-			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 90));
-			steps.add(new Turn(myRobot, lEncod, rEncod, -7));
+			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 98));
+			steps.add(new Turn(myRobot, lEncod, rEncod, -6));
 			steps.add(new TurnToVisionCenter(this.imageInfo, myRobot));
 			steps.add(new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo));
 			steps.add(new OpenGate(this.gearGate));
-			steps.add(new DriveBackwards(myRobot, lEncod, rEncod, 24));
+			steps.add(new DriveBackwards(myRobot, lEncod, rEncod, 72));
 			steps.add(new CloseGate(this.gearGate));
-			steps.add(new Turn(myRobot, lEncod, rEncod, 7));
-			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 24)); // TODO:
+			steps.add(new TurnToVisionCenter(this.imageInfo, myRobot));
+			steps.add(new Turn(myRobot, lEncod, rEncod, 16));
+			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 108)); // TODO:
 																		// boost
 																		// this
 
-			if (boilerPosition == BoilerPosition.BOILER_IS_ON_MY_LEFT) {
-				steps.add(new Turn(myRobot, lEncod, rEncod, -4));
-			}
-			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 24)); // TODO:
-																		// boost
-																		// this
+//			if (boilerPosition == BoilerPosition.BOILER_IS_ON_MY_LEFT) {
+//				steps.add(new Turn(myRobot, lEncod, rEncod, -4));
+//			}
+//			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 24)); // TODO:
+//																		// boost
+//																		// this
 			break;
 
 		case CENTER_AND_STOP: // CENTER

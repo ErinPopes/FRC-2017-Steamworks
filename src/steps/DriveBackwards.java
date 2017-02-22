@@ -23,7 +23,7 @@ public class DriveBackwards extends Drive {
 		} else {
 			double tickDistance = this.distance * ticksPerInch;
 			if (Math.abs(lEncoder.get()) < Math.abs(tickDistance)) {
-				robotDrive.arcadeDrive(.5, 0, true);
+				robotDrive.arcadeDrive(.7, 0, true);
 			} else {
 				robotDrive.arcadeDrive(0, 0, true);
 				return true;

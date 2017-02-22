@@ -15,9 +15,12 @@ public class DriveForwards implements Step {
 		this.robotDrive = robotDrive;
 		this.lEncoder = lEncoder;
 		this.rEncoder = rEncoder;
-		this.distance = distance; //in inches
+		this.distance = distance; // in inches
 		execute();
 	}
+
+	private double maximal = 0.9;
+	private double minimal = 0.6;
 
 	@Override
 	public boolean execute() {
@@ -28,14 +31,36 @@ public class DriveForwards implements Step {
 			hasExec = true;
 			robotDrive.setSafetyEnabled(false);
 		} else {
-			double tickDistance = this.distance * ticksPerInch;
-			if (Math.abs(lEncoder.get()) < Math.abs(tickDistance)) {
-				robotDrive.arcadeDrive(-.9, 0.3, true); //Trust in the magic number
+			double targetDistance = this.distance * ticksPerInch;
+			double currentDistance = Math.abs(lEncoder.get());
+			if (currentDistance < targetDistance) {
+
+				double rampUp = 12 * ticksPerInch;
+				double rampDown = 24 * ticksPerInch;
+				if (currentDistance > targetDistance - rampDown) {
+
+					double d = (targetDistance - currentDistance) / rampDown;
+
+					robotDrive.arcadeDrive(-lerp(minimal, maximal, d), 0.25, true);
+
+				} else if (currentDistance < rampUp) {
+
+					double d = currentDistance / rampUp;
+					robotDrive.arcadeDrive(-lerp(minimal, maximal,d), 0.25, true);
+
+				} else {
+					robotDrive.arcadeDrive(-maximal, 0.25, true);
+				}
+
 			} else {
 				robotDrive.arcadeDrive(0, 0, true);
 				return true;
 			}
 		}
 		return false;
+	}
+
+	double lerp(double start, double end, double t) {
+		return (1 - t) * start + t * end;
 	}
 }
