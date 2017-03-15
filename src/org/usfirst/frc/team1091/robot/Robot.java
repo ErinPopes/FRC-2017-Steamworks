@@ -69,14 +69,14 @@ public class Robot extends IterativeRobot {
 		myRobot.setExpiration(0.1);
 		xbox = new Joystick(0);
 
-		lifterSwitch = new DigitalInput(2);
+		lifterSwitch = new DigitalInput(9);
 		lifterSpike = new Relay(0);
 		this.gearGate = new GearGate();
 
 		lEncod = new Encoder(6, 7, true);
 		rEncod = new Encoder(4, 5);
 
-		climber = new Spark(5);
+		climber = new Spark(9);
 
 		this.imageInfo = new ImageInfo();
 
@@ -287,6 +287,7 @@ public class Robot extends IterativeRobot {
 			this.lifter();
 			this.dropper();
 		}
+		gearGate.print();
 	}
 
 	@Override

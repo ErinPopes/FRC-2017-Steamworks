@@ -6,7 +6,7 @@ public class BallDropper {
 	private Spark spark;
 	
 	public BallDropper(){
-		this.spark = new Spark(6);
+		this.spark = new Spark(8);
 	}
 	
 	public void drop(){
