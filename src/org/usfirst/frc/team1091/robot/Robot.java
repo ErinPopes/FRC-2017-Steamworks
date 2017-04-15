@@ -63,6 +63,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		color = DriverStation.getInstance().getAlliance();
+		
 		System.out.print(color.name());
 
 		myRobot = new RobotDrive(0, 1, 2, 3);
@@ -105,12 +106,14 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putData("Starting position", startingPositionChooser);
 		SmartDashboard.putData("Is boiler to your right or left", boilerPositionChooser);
 		System.out.println("We are actually running");
+
+		
 		Runnable visionUpdater = () -> {
 			while (true) {
 				try {
-					URL visionURL = new URL("http://10.10.91.34:5805/");
-
-					// URL visionURL = new URL("http://10.10.91.106:5805/");
+					URL visionURL = new URL("http://10.10.91.20:5805/"); //comp
+					//ForTesting//URL visionURL = new URL("http://169.254.71.106:5805/");
+					
 					BufferedReader in = new BufferedReader(new InputStreamReader(visionURL.openStream()));
 
 					String inputLine = in.readLine();
@@ -130,7 +133,9 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void robotPeriodic() {
-
+		//computerIP = SmartDashboard.getString("computerIP","20");
+		//computerIP = SmartDashboard.getInt("computerIP",0);
+	
 	}
 
 	@Override
@@ -149,16 +154,16 @@ public class Robot extends IterativeRobot {
 
 		switch (startingPostition) {
 		case RIGHT:
-			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 98));
-			steps.add(new Turn(myRobot, lEncod, rEncod, 7));
+			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 90));
+			steps.add(new Turn(myRobot, lEncod, rEncod, 7));//was 7
 			steps.add(new TurnToVisionCenter(this.imageInfo, myRobot));
 			steps.add(new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo));
-			steps.add(new OpenGate(this.gearGate));
-			steps.add(new DriveBackwards(myRobot, lEncod, rEncod, 72));
+			steps.add(new OpenGate(this.gearGate, this.imageInfo));			
+			steps.add(new DriveBackwards(myRobot, lEncod, rEncod, 36));
 			steps.add(new CloseGate(this.gearGate));
 			steps.add(new TurnToVisionCenter(this.imageInfo, myRobot));
-			steps.add(new Turn(myRobot, lEncod, rEncod, -16));
-			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 108)); // TODO:
+			steps.add(new Turn(myRobot, lEncod, rEncod, -8));
+			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 118)); // TODO:
 																		// boost
 																		// this
 
@@ -171,16 +176,16 @@ public class Robot extends IterativeRobot {
 			break;
 
 		case LEFT:
-			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 98));
-			steps.add(new Turn(myRobot, lEncod, rEncod, -6));
+			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 86));
+			steps.add(new Turn(myRobot, lEncod, rEncod, -3));
 			steps.add(new TurnToVisionCenter(this.imageInfo, myRobot));
 			steps.add(new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo));
-			steps.add(new OpenGate(this.gearGate));
-			steps.add(new DriveBackwards(myRobot, lEncod, rEncod, 72));
+			steps.add(new OpenGate(this.gearGate, this.imageInfo));
+			steps.add(new DriveBackwards(myRobot, lEncod, rEncod, 36));
 			steps.add(new CloseGate(this.gearGate));
 			steps.add(new TurnToVisionCenter(this.imageInfo, myRobot));
-			steps.add(new Turn(myRobot, lEncod, rEncod, 16));
-			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 108)); // TODO:
+			steps.add(new Turn(myRobot, lEncod, rEncod, 8));
+			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 118)); // TODO:
 																		// boost
 																		// this
 
@@ -194,14 +199,14 @@ public class Robot extends IterativeRobot {
 
 		case CENTER_AND_STOP: // CENTER
 			steps.add(new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo));
-			steps.add(new OpenGate(this.gearGate));
+			steps.add(new OpenGate(this.gearGate, this.imageInfo));
 			steps.add(new DriveBackwards(myRobot, lEncod, rEncod, 10));
 			steps.add(new CloseGate(this.gearGate));
 			break;
 
 		case CENTER_AND_LEFT_ROUND:
 			steps.add(new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo));
-			steps.add(new OpenGate(this.gearGate));
+			steps.add(new OpenGate(this.gearGate, this.imageInfo));
 			steps.add(new DriveBackwards(myRobot, lEncod, rEncod, 24));
 			steps.add(new CloseGate(this.gearGate));
 			steps.add(new Turn(myRobot, lEncod, rEncod, 14));
@@ -220,7 +225,7 @@ public class Robot extends IterativeRobot {
 
 		case CENTER_AND_RIGHT_ROUND: // CENTER
 			steps.add(new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo));
-			steps.add(new OpenGate(this.gearGate));
+			steps.add(new OpenGate(this.gearGate, this.imageInfo));
 			steps.add(new DriveBackwards(myRobot, lEncod, rEncod, 24));
 			steps.add(new CloseGate(this.gearGate));
 			steps.add(new Turn(myRobot, lEncod, rEncod, -14));
@@ -237,7 +242,7 @@ public class Robot extends IterativeRobot {
 			break;
 
 		case DRIVE_FORWARDS_WITH_NO_GEAR:
-			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 100));
+			steps.add(new DriveForwards(myRobot, lEncod, rEncod, 150));
 			break;
 		case DO_NOTHING_ATALL:
 
@@ -272,7 +277,7 @@ public class Robot extends IterativeRobot {
 
 				ArrayList<Step> steps = new ArrayList<>();
 				steps.add(new DriveUntilClose(myRobot, lEncod, rEncod, this.imageInfo));
-				steps.add(new OpenGate(this.gearGate));
+				steps.add(new OpenGate(this.gearGate, this.imageInfo));
 				steps.add(new DriveBackwards(myRobot, lEncod, rEncod, 10));
 				steps.add(new CloseGate(this.gearGate));
 				placeGear = new StepExecutor(steps);

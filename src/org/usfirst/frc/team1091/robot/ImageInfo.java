@@ -5,14 +5,15 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class ImageInfo {
 	private float center = 0;
 	private float distance = 0;
-
+	private boolean imageSeen = false;
+	
 	public void update(String input) {
 		if (input != null && !input.isEmpty()) {
 			String[] split = input.split(",");
 			if (split.length == 2) {
 				center = Float.parseFloat(split[0]) - 0.1f;
 				distance = Float.parseFloat(split[1]);
-
+				imageSeen = true;
 				SmartDashboard.putNumber("Center", this.center);
 				SmartDashboard.putNumber("Distance", this.distance);
 			}
@@ -25,5 +26,8 @@ public class ImageInfo {
 
 	public float getDistance() {
 		return this.distance;
+	}
+	public boolean getHasSeen() {
+		return imageSeen;
 	}
 }
